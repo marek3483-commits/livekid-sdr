@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SDR Starter Pack — LiveKid</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background-color: #eef2ff;
+      background-image:
+        radial-gradient(ellipse 70% 60% at 5%  10%,  rgba(0,208,132,0.30)  0%, transparent 100%),
+        radial-gradient(ellipse 60% 55% at 95% 5%,   rgba(6,147,227,0.28)  0%, transparent 100%),
+        radial-gradient(ellipse 65% 60% at 92% 92%,  rgba(122,0,223,0.22)  0%, transparent 100%),
+        radial-gradient(ellipse 60% 55% at 5%  95%,  rgba(225,29,72,0.20)  0%, transparent 100%),
+        radial-gradient(ellipse 50% 50% at 50% 50%,  rgba(255,107,53,0.10) 0%, transparent 100%);
+      background-attachment: fixed;
+    }
+    .script-card { height: 320px; overflow-y: auto; }
+    .script-card::-webkit-scrollbar { width: 3px; }
+    .script-card::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    .tab-active-wstepy    { background: #00d084 !important; color: white !important; border-color: transparent !important; }
+    .tab-active-argumenty { background: #7a00df !important; color: white !important; border-color: transparent !important; }
+    .tab-active-pytania   { background: #0693e3 !important; color: white !important; border-color: transparent !important; }
+    .tab-active-wzory     { background: #ff6b35 !important; color: white !important; border-color: transparent !important; }
+    .tab-active-ulubione    { background: #f59e0b !important; color: white !important; border-color: transparent !important; }
+    .tab-active-konkurencja  { background: #e11d48 !important; color: white !important; border-color: transparent !important; }
+    .tab-active-mocnestrony  { background: #0891b2 !important; color: white !important; border-color: transparent !important; }
+    .stat-card { background: rgba(255,255,255,0.82); backdrop-filter: blur(8px); border-radius: 20px; padding: 28px 24px; text-align: center; box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
+    .benefit-card { background: rgba(255,255,255,0.88); backdrop-filter: blur(8px); border-radius: 20px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
+    .benefit-img { width: 100%; height: 180px; object-fit: cover; }
+    .benefit-body { padding: 20px 22px 22px; }
+    .benefit-icon { font-size: 2rem; margin-bottom: 10px; }
+    .benefit-title { font-size: 1rem; font-weight: 800; color: #111827; margin-bottom: 8px; line-height: 1.3; }
+    .benefit-text { font-size: 0.875rem; color: #4b5563; line-height: 1.7; }
+    .benefit-badge { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+    .arrow:hover { opacity: 0.8; }
+    .arrow:disabled { opacity: 0.2; cursor: default; }
+    .dot { height: 8px; border-radius: 999px; cursor: pointer; transition: all 0.2s; }
+    .modal-bg { background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); }
+    .q-row:hover { filter: brightness(0.97); }
+  </style>
+</head>
+<body class="min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-20">
+  <div class="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+    <img src="https://livekid.com/wp-content/uploads/2021/05/logo-livekid.svg" alt="LiveKid" class="h-8"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+    <span style="display:none;color:#7a00df" class="font-bold text-xl">LiveKid</span>
+    <div class="w-px h-5 bg-gray-200"></div>
+    <span class="text-sm font-semibold text-gray-500">SDR Starter Pack</span>
+  </div>
+</header>
+
+<!-- ZAKŁADKI -->
+<style>
+  .tabs-row { display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; flex-wrap:nowrap; scrollbar-width:none; }
+  .tabs-row::-webkit-scrollbar { display:none; }
+  .tab-btn { flex-shrink:0; white-space:nowrap; padding:8px 14px; border-radius:999px; font-size:0.8rem; font-weight:600; border:1.5px solid #e5e7eb; background:rgba(255,255,255,0.75); color:#6b7280; cursor:pointer; transition:all .15s; backdrop-filter:blur(4px); }
+  .tab-btn.active-wstepy      { background:#00d084; color:white; border-color:#00d084; }
+  .tab-btn.active-argumenty   { background:#7a00df; color:white; border-color:#7a00df; }
+  .tab-btn.active-mocnestrony { background:#0891b2; color:white; border-color:#0891b2; }
+  .tab-btn.active-pytania     { background:#0693e3; color:white; border-color:#0693e3; }
+  .tab-btn.active-wzory       { background:#ff6b35; color:white; border-color:#ff6b35; }
+  .tab-btn.active-konkurencja { background:#e11d48; color:white; border-color:#e11d48; }
+  .tab-btn.active-ulubione    { background:#f59e0b; color:white; border-color:#f59e0b; }
+</style>
+<div class="max-w-3xl mx-auto px-4 pt-5">
+  <div class="tabs-row">
+    <button onclick="switchTab('wstepy')"      id="t-wstepy"      class="tab-btn active-wstepy">Wstępy</button>
+    <button onclick="switchTab('argumenty')"   id="t-argumenty"   class="tab-btn">Kontra-argumenty</button>
+    <button onclick="switchTab('mocnestrony')" id="t-mocnestrony" class="tab-btn">Mocne strony</button>
+    <button onclick="switchTab('pytania')"     id="t-pytania"     class="tab-btn">Pytania</button>
+    <button onclick="switchTab('wzory')"       id="t-wzory"       class="tab-btn">Wzory</button>
+    <button onclick="switchTab('konkurencja')" id="t-konkurencja" class="tab-btn">Konkurencja</button>
+    <button onclick="switchTab('ulubione')"    id="t-ulubione"    class="tab-btn" style="display:inline-flex;align-items:center;gap:5px">
+      ★ <span id="fav-count" style="background:#f59e0b;color:white;font-size:0.65rem;font-weight:700;border-radius:999px;padding:1px 6px;min-width:18px;text-align:center">0</span>
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="max-w-3xl mx-auto px-4 py-6">
+
+  <!-- WSTĘPY -->
+  <div id="tab-wstepy">
+    <div class="flex items-center justify-between mb-4">
+      <p class="text-sm text-gray-400"><span id="ci">1</span> / <span id="ct">10</span></p>
+      <button onclick="openModal()" class="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-full shadow" style="background:#00d084">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        Dodaj własny
+      </button>
+    </div>
+    <div class="flex items-start gap-3">
+      <button id="prev-btn" onclick="prevCard()" class="arrow flex-shrink-0 w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 shadow-sm mt-1" disabled>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="flex-1">
+        <div class="script-card bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+          <div class="flex items-start justify-between mb-3">
+            <h2 id="card-title" class="text-lg font-bold text-gray-900"></h2>
+            <div class="flex items-center gap-2 ml-3 flex-shrink-0">
+              <button id="star-btn" onclick="toggleFav()" class="text-2xl text-gray-300 leading-none transition-transform hover:scale-125">★</button>
+              <button id="del-btn"  onclick="deleteCard()" class="hidden text-lg text-gray-300 hover:text-red-400 leading-none">✕</button>
+            </div>
+          </div>
+          <p id="card-text" class="text-gray-700 leading-relaxed text-[0.96rem]"></p>
+          <div id="followup-wrap" class="hidden mt-4 pt-4 border-t border-gray-100">
+            <p class="text-xs font-bold uppercase tracking-widest mb-2 text-green-600">Follow-up</p>
+            <p id="card-followup" class="text-gray-700 leading-relaxed text-[0.96rem]"></p>
+          </div>
+        </div>
+      </div>
+      <button id="next-btn" onclick="nextCard()" class="arrow flex-shrink-0 w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 shadow-sm mt-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div id="dots" class="flex justify-center gap-1.5 mt-4"></div>
+    <div class="flex justify-center mt-5">
+      <button onclick="copyScript()" class="flex items-center gap-2 border text-sm font-semibold px-6 py-2.5 rounded-full bg-white transition" style="border-color:#00d084;color:#00d084">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+        <span id="copy-lbl">Kopiuj do schowka</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ULUBIONE -->
+  <div id="tab-ulubione" class="hidden">
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button onclick="switchUlubione('wstepy')" id="ul-t-wstepy" style="flex:1;padding:9px;border-radius:12px;font-size:0.875rem;font-weight:700;border:1.5px solid #f59e0b;background:#f59e0b;color:white;cursor:pointer">Wstępy</button>
+      <button onclick="switchUlubione('mocne')"  id="ul-t-mocne"  style="flex:1;padding:9px;border-radius:12px;font-size:0.875rem;font-weight:700;border:1.5px solid #e5e7eb;background:white;color:#6b7280;cursor:pointer">Mocne strony</button>
+    </div>
+    <div id="ul-content-wstepy">
+      <div id="fav-empty" class="text-center py-16 text-gray-400">
+        <div class="text-5xl mb-3">★</div>
+        <p class="font-semibold text-gray-500">Brak ulubionych</p>
+        <p class="text-sm mt-1">Kliknij gwiazdkę na karcie wstępu, aby dodać</p>
+      </div>
+      <div id="fav-list" class="space-y-4"></div>
+    </div>
+    <div id="ul-content-mocne" class="hidden">
+      <div id="mocne-fav-empty" class="text-center py-16 text-gray-400">
+        <div class="text-5xl mb-3">★</div>
+        <p class="font-semibold text-gray-500">Brak ulubionych mocnych stron</p>
+        <p class="text-sm mt-1">Kliknij gwiazdkę na karcie w Mocne strony</p>
+      </div>
+      <div id="mocne-fav-list" style="display:grid;grid-template-columns:1fr 1fr;gap:16px"></div>
+    </div>
+  </div>
+
+  <!-- ARGUMENTY -->
+  <div id="tab-argumenty" class="hidden">
+    <div id="arg-list" class="space-y-3"></div>
+  </div>
+
+  <!-- PYTANIA -->
+  <div id="tab-pytania" class="hidden">
+    <div class="flex flex-wrap gap-2 mb-5">
+      <div class="flex items-center gap-2 bg-white border border-gray-100 rounded-full px-3 py-1.5 shadow-sm">
+        <span class="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block"></span>
+        <span class="text-xs font-semibold text-gray-600">N — Neutralne</span>
+      </div>
+      <div class="flex items-center gap-2 bg-white border border-gray-100 rounded-full px-3 py-1.5 shadow-sm">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+        <span class="text-xs font-semibold text-gray-600">P — Problemowe</span>
+      </div>
+      <div class="flex items-center gap-2 bg-white border border-gray-100 rounded-full px-3 py-1.5 shadow-sm">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
+        <span class="text-xs font-semibold text-gray-600">S — Sugerujące rozwiązanie</span>
+      </div>
+    </div>
+    <div id="q-list" class="space-y-3"></div>
+  </div>
+
+  <!-- WZORY -->
+  <div id="tab-wzory" class="hidden">
+    <div id="wzory-list" class="space-y-4"></div>
+  </div>
+
+  <!-- MOCNE STRONY -->
+  <div id="tab-mocnestrony" class="hidden">
+
+    <!-- HERO -->
+    <div style="background:linear-gradient(135deg,#7a00df 0%,#0693e3 60%,#00d084 100%);border-radius:24px;padding:36px 28px 32px;margin-bottom:24px;text-align:center;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;opacity:0.08;background:url('https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=800&q=80') center/cover"></div>
+      <div style="position:relative">
+        <img src="https://livekid.com/wp-content/uploads/2021/05/logo-livekid.svg" alt="LiveKid" style="height:40px;filter:brightness(0) invert(1);margin:0 auto 16px;display:block"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+        <span style="display:none;color:white;font-size:1.5rem;font-weight:900;display:block;margin-bottom:16px">LiveKid</span>
+        <p style="color:white;font-size:1.2rem;font-weight:800;margin-bottom:6px;line-height:1.3">Numer 1 w cyfryzacji przedszkoli w Polsce</p>
+        <p style="color:rgba(255,255,255,0.85);font-size:0.875rem">Więcej niż aplikacja. Partner w prowadzeniu placówki.</p>
+      </div>
+    </div>
+
+    <!-- STATYSTYKI -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px">
+      <div class="stat-card">
+        <div style="font-size:2rem;font-weight:900;color:#7a00df;line-height:1">4 000+</div>
+        <div style="font-size:0.75rem;font-weight:600;color:#6b7280;margin-top:6px;line-height:1.4">placówek w Polsce</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:2rem;font-weight:900;color:#00d084;line-height:1">20 000+</div>
+        <div style="font-size:0.75rem;font-weight:600;color:#6b7280;margin-top:6px;line-height:1.4">nauczycieli i dyrektorów</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:2rem;font-weight:900;color:#0693e3;line-height:1">500 000+</div>
+        <div style="font-size:0.75rem;font-weight:600;color:#6b7280;margin-top:6px;line-height:1.4">rodziców korzysta codziennie</div>
+      </div>
+    </div>
+
+    <!-- BENEFIT CARDS (dynamiczne) -->
+    <div id="mocne-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px"></div>
+  </div>
+
+  <!-- KONKURENCJA -->
+  <div id="tab-konkurencja" class="hidden">
+    <div id="konk-list" class="space-y-3"></div>
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div id="modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-bg px-4" onclick="if(event.target===this)closeModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-gray-900">Dodaj własny wstęp</h3>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-widest block mb-1.5">Nazwa</label>
+        <input id="m-title" type="text" placeholder="np. Mój styl" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-400"/>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-widest block mb-1.5">Treść</label>
+        <textarea id="m-text" rows="5" placeholder="Wpisz treść wstępu..." class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-400 resize-none"></textarea>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-5">
+      <button onclick="closeModal()" class="flex-1 border border-gray-200 text-gray-500 font-semibold py-2.5 rounded-xl text-sm hover:bg-gray-50">Anuluj</button>
+      <button onclick="saveScript()" class="flex-1 text-white font-semibold py-2.5 rounded-xl text-sm" style="background:#00d084">Zapisz</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DANE ─────────────────────────────────────────────────────────────────────
+var scripts = [
+  { id:1,  title:"Szczerość",
+    text:"Dzień dobry, [Imię] z LiveKid z tej strony, czy z Panią Dyrektor mam przyjemność? Pani Dyrektor, będę z Panią szczery — dzwonię z ofertą, ale zanim cokolwiek powiem, chciałem zapytać wprost: czy ma Pani dosłownie 30 sekund? Jeśli uzna Pani, że to nie jest coś dla Was — nie będę zawracał głowy.",
+    followup:"Dziękuję. Powiem Pani wprost — jesteśmy liderem cyfryzacji przedszkoli w Polsce, współpracuje z nami ponad 4 tysiące placówek i pół miliona rodziców korzysta z naszej aplikacji na co dzień. Dyrektorzy, którzy zaczęli z nami współpracę, mówią głównie jedno: żałują, że nie zrobili tego wcześniej. I rozumiem ich — bo mówimy o średnio 12 godzinach miesięcznie zaoszczędzonych na dziennikach i 8 godzinach na rozliczeniach. To jest czas, który można oddać nauczycielom z powrotem. Czy mógłbym zadać kilka pytań, żeby sprawdzić czy możemy się Pani przydać?",
+    custom:false },
+  { id:2,  title:"Porządki w relacjach",
+    text:"Dzień dobry, [Imię] z LiveKid z tej strony, czy z Panią Dyrektor mam przyjemność? Dzwonię, bo robię porządki w naszych relacjach z placówkami i widzę w notatkach, że rozmawialiśmy ostatnio w [miesiąc] — wtedy miała Pani sporo na głowie. Chciałem zapytać czy teraz ma Pani chwilkę na rozmowę?",
+    followup:null, custom:false },
+  { id:3,  title:"Weryfikacja danych",
+    text:"Dzień dobry, [Imię] z LiveKid z tej strony, czy z Panią Dyrektor mam przyjemność? Ostatnio jak się z Wami kontaktowałem to mieliście [X] dzieci, ale słyszałem od placówek w okolicy, że niż demograficzny daje się we znaki. Jak teraz wygląda u Was sytuacja?",
+    followup:null, custom:false },
+  { id:4,  title:"Badanie rynku",
+    text:"Dzień dobry, [Imię] z LiveKid z tej strony, czy z Panią Dyrektor mam przyjemność? Dzwonię trochę z pytaniem teoretycznym — rozmawiamy z tysiącami placówek w Polsce i bardzo zależy nam na Was. Chciałem zapytać szczerze: czy jest coś, czego Pani zdaniem brakuje w narzędziach do zarządzania przedszkolem? Liczę na szczerą odpowiedź, bo to dla nas cenne.",
+    followup:null, custom:false },
+  { id:5,  title:"Lider rynku",
+    text:"Dzień dobry, [Imię] z LiveKid z tej strony, czy z Panią Dyrektor mam przyjemność? Dzwonię jako lider rynku cyfryzacji przedszkoli w Polsce — współpracuje z nami ponad 4 tysiące placówek. Chciałem zapytać, czy Wy w ogóle rozważaliście takie rozwiązania jak aplikacja w placówce?",
+    followup:null, custom:false },
+  { id:6,  title:"Umówiony termin",
+    text:"Dzień dobry, [Imię] z LiveKid z tej strony, czy z Panią Dyrektor mam przyjemność? Miałem się odezwać właśnie w [miesiąc], bo ostatnio miała Pani sporo na głowie — chciałem zapytać czy teraz ma Pani chwilkę na rozmowę?",
+    followup:null, custom:false },
+  { id:7,  title:"Lokalny odzew",
+    text:"Dzień dobry, [Imię] z LiveKid z tej strony, czy z Panią Dyrektor mam przyjemność? Kontaktuję się z placówkami w [powiat] i słyszę coraz więcej pozytywnych opinii o aplikacjach — chciałem zapytać jak sytuacja wygląda u Was?",
+    followup:null, custom:false },
+  { id:8,  title:"Kapitan Bomba",
+    text:"Dzień dobry, [Imię] z LiveKid z tej strony, czy z Panią Dyrektor mam przyjemność? Kontaktuję się, bo sprawdzam możliwości wsparcia placówek takich jak Wasza. Chciałem zająć dosłownie 5 minut i zadać kilka pytań — żeby zobaczyć czy to co mamy może być w ogóle warte Pani uwagi.",
+    followup:null, custom:false },
+  { id:9,  title:"Webinar",
+    text:"Dzień dobry, [Imię] z LiveKid z tej strony, czy z Panią Dyrektor mam przyjemność? Dzwonię, bo organizujemy bezpłatne szkolenia online dla dyrektorów placówek — wiem, że szkolenia kadr są u Was obowiązkowe, więc pomyślałem że warto się odezwać. Ostatnio robiliśmy webinar o [temat], a uczestnicy dostają imienny certyfikat. Chciałem zapytać czy byłaby Pani zainteresowana udziałem w kolejnym?",
+    followup:null, custom:false },
+  { id:10, title:"Niż demograficzny",
+    text:"Dzień dobry, [Imię] z LiveKid z tej strony, czy z Panią Dyrektor mam przyjemność? Dzwonię, bo wiem że w obecnym czasie trwa walka o każde dziecko w obliczu niżu demograficznego. Co ciekawe — słyszę od dyrektorów, że nie oznacza to wcale że placówek jest coraz mniej, a wręcz przeciwnie. Chciałem zapytać — czy Wy w [miasto/wieś] odczuwacie to samo?",
+    followup:null, custom:false },
+];
+
+var favs = [];
+var idx  = 0;
+var openQ = [0];
+
+// ── KARTA ────────────────────────────────────────────────────────────────────
+function renderCard() {
+  var s = scripts[idx];
+  document.getElementById('card-title').textContent = s.title;
+  document.getElementById('card-text').textContent  = s.text;
+  document.getElementById('ci').textContent = idx + 1;
+  document.getElementById('ct').textContent = scripts.length;
+
+  var fw = document.getElementById('followup-wrap');
+  if (s.followup) {
+    fw.classList.remove('hidden');
+    document.getElementById('card-followup').textContent = s.followup;
+  } else {
+    fw.classList.add('hidden');
+  }
+
+  var star = document.getElementById('star-btn');
+  star.style.color = favs.indexOf(s.id) !== -1 ? '#f59e0b' : '#d1d5db';
+
+  var del = document.getElementById('del-btn');
+  if (s.custom) del.classList.remove('hidden');
+  else del.classList.add('hidden');
+
+  document.getElementById('prev-btn').disabled = (idx === 0);
+  document.getElementById('next-btn').disabled = (idx === scripts.length - 1);
+
+  renderDots();
+}
+
+function renderDots() {
+  var c = document.getElementById('dots');
+  c.innerHTML = '';
+  for (var i = 0; i < scripts.length; i++) {
+    var d = document.createElement('div');
+    d.className = 'dot';
+    d.style.width      = (i === idx) ? '20px' : '8px';
+    d.style.background = (i === idx) ? '#00d084' : '#d1d5db';
+    d.setAttribute('data-i', i);
+    d.onclick = function() { idx = parseInt(this.getAttribute('data-i')); renderCard(); };
+    c.appendChild(d);
+  }
+}
+
+function prevCard() { if (idx > 0) { idx--; renderCard(); } }
+function nextCard() { if (idx < scripts.length - 1) { idx++; renderCard(); } }
+
+// ── GWIAZDKA ─────────────────────────────────────────────────────────────────
+function updateFavCount() {
+  document.getElementById('fav-count').textContent = favs.length + mocneFavs.length;
+}
+
+function toggleFav() {
+  var id = scripts[idx].id;
+  var pos = favs.indexOf(id);
+  if (pos !== -1) favs.splice(pos, 1);
+  else favs.push(id);
+  renderCard();
+  updateFavCount();
+}
+
+// ── ULUBIONE — WSTĘPY ────────────────────────────────────────────────────────
+var ulTab = 'wstepy';
+
+function switchUlubione(name) {
+  ulTab = name;
+  var wD = document.getElementById('ul-content-wstepy');
+  var mD = document.getElementById('ul-content-mocne');
+  var wB = document.getElementById('ul-t-wstepy');
+  var mB = document.getElementById('ul-t-mocne');
+  if (name === 'wstepy') {
+    wD.classList.remove('hidden'); mD.classList.add('hidden');
+    wB.style.background = '#f59e0b'; wB.style.color = 'white'; wB.style.borderColor = '#f59e0b';
+    mB.style.background = 'white';   mB.style.color = '#6b7280'; mB.style.borderColor = '#e5e7eb';
+    renderFavList();
+  } else {
+    wD.classList.add('hidden'); mD.classList.remove('hidden');
+    wB.style.background = 'white';   wB.style.color = '#6b7280'; wB.style.borderColor = '#e5e7eb';
+    mB.style.background = '#0891b2'; mB.style.color = 'white';   mB.style.borderColor = '#0891b2';
+    renderMocneFavList();
+  }
+}
+
+function renderFavList() {
+  var list  = document.getElementById('fav-list');
+  var empty = document.getElementById('fav-empty');
+  var items = scripts.filter(function(s) { return favs.indexOf(s.id) !== -1; });
+  list.innerHTML = '';
+  if (!items.length) { empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  items.forEach(function(s) {
+    var d = document.createElement('div');
+    d.className = 'bg-white border border-gray-100 rounded-2xl p-5 shadow-sm';
+    d.innerHTML =
+      '<div class="flex items-start justify-between mb-2">' +
+        '<h3 class="font-bold text-gray-900">' + s.title + '</h3>' +
+        '<button style="color:#f59e0b;font-size:1.25rem;line-height:1" onclick="removeFav(' + s.id + ')">★</button>' +
+      '</div>' +
+      '<p class="text-gray-700 text-sm leading-relaxed">' + s.text + '</p>' +
+      (s.followup ? '<div class="mt-3 pt-3 border-t border-gray-100"><p class="text-xs font-bold uppercase tracking-widest mb-1 text-green-600">Follow-up</p><p class="text-gray-700 text-sm leading-relaxed">' + s.followup + '</p></div>' : '');
+    list.appendChild(d);
+  });
+}
+
+function removeFav(id) {
+  var pos = favs.indexOf(id);
+  if (pos !== -1) favs.splice(pos, 1);
+  updateFavCount();
+  renderFavList();
+  renderCard();
+}
+
+// ── ULUBIONE — MOCNE STRONY ──────────────────────────────────────────────────
+var mocneFavs = [];
+
+function toggleMocneFav(i) {
+  var pos = mocneFavs.indexOf(i);
+  if (pos !== -1) mocneFavs.splice(pos, 1);
+  else mocneFavs.push(i);
+  updateFavCount();
+  renderMocneStrony();
+}
+
+function renderMocneFavList() {
+  var list  = document.getElementById('mocne-fav-list');
+  var empty = document.getElementById('mocne-fav-empty');
+  if (!list) return;
+  list.innerHTML = '';
+  var items = MOCNE_CARDS.filter(function(_, i) { return mocneFavs.indexOf(i) !== -1; });
+  if (!items.length) { empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  items.forEach(function(card) {
+    var el = document.createElement('div');
+    el.className = 'benefit-card';
+    el.innerHTML =
+      '<img class="benefit-img" src="' + card.img + '" alt="' + card.title + '" onerror="this.style.display=\'none\'"/>' +
+      '<div class="benefit-body">' +
+        '<span class="benefit-badge" style="' + card.badgeStyle + '">' + card.badge + '</span>' +
+        '<div class="benefit-title">' + card.title + '</div>' +
+        '<p class="benefit-text">' + card.args[0] + '</p>' +
+      '</div>';
+    list.appendChild(el);
+  });
+}
+
+// ── USUŃ ─────────────────────────────────────────────────────────────────────
+function deleteCard() {
+  var id = scripts[idx].id;
+  removeFav(id);
+  scripts.splice(idx, 1);
+  if (idx >= scripts.length) idx = scripts.length - 1;
+  renderCard();
+}
+
+// ── KOPIUJ ───────────────────────────────────────────────────────────────────
+function copyScript() {
+  var s = scripts[idx];
+  var txt = s.followup ? s.text + '\n\n[Follow-up]\n' + s.followup : s.text;
+  navigator.clipboard.writeText(txt).then(function() {
+    var lbl = document.getElementById('copy-lbl');
+    lbl.textContent = 'Skopiowano!';
+    setTimeout(function() { lbl.textContent = 'Kopiuj do schowka'; }, 2000);
+  });
+}
+
+// ── MODAL ────────────────────────────────────────────────────────────────────
+function openModal()  { document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+function saveScript() {
+  var title = document.getElementById('m-title').value.trim();
+  var text  = document.getElementById('m-text').value.trim();
+  if (!title || !text) { alert('Uzupełnij nazwę i treść.'); return; }
+  scripts.push({ id: Date.now(), title: title, text: text, followup: null, custom: true });
+  idx = scripts.length - 1;
+  renderCard();
+  closeModal();
+}
+
+// ── ZAKŁADKI ─────────────────────────────────────────────────────────────────
+var TABS = ['wstepy','argumenty','pytania','wzory','mocnestrony','konkurencja','ulubione'];
+
+function switchTab(name) {
+  TABS.forEach(function(t) {
+    document.getElementById('tab-' + t).classList.add('hidden');
+    var btn = document.getElementById('t-' + t);
+    btn.classList.remove('active-wstepy','active-argumenty','active-mocnestrony','active-pytania','active-wzory','active-konkurencja','active-ulubione');
+  });
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  document.getElementById('t-' + name).classList.add('active-' + name);
+  if (name === 'ulubione')    renderFavList();
+  if (name === 'pytania')     renderPytania();
+  if (name === 'argumenty')   renderArgumenty();
+  if (name === 'wzory')       renderWzory();
+  if (name === 'mocnestrony') renderMocneStrony();
+  if (name === 'konkurencja') renderKonkurencja();
+}
+
+// ── PYTANIA ──────────────────────────────────────────────────────────────────
+var QUESTIONS = [
+  { section:"Rozliczenia z rodzicami", icon:"💳", questions:[
+    {t:'N', q:"Kto u Was pilnuje płatności – Pani czy ktoś z zespołu?"},
+    {t:'N', q:"W jaki sposób dziś rozliczacie się z rodzicami – przelewy, gotówka, coś mieszanego?"},
+    {t:'P', q:"Czy zdarza się, że trzeba sprawdzać ręcznie, kto już zapłacił, a kto nie?"},
+    {t:'P', q:"Jak często rodzice pytają czy przelew już doszedł?"},
+    {t:'P', q:"Czy bywają opóźnienia w płatnościach?"},
+    {t:'S', q:"A gdyby system sam pilnował terminów i przypomnień, co by Pani najbardziej odciążyło?"},
+    {t:'S', q:"Czy ważniejsze byłoby dla Pani mniej telefonów czy mniej ręcznej pracy?"},
+  ]},
+  { section:"Jest księgowa", icon:"🧾", questions:[
+    {t:'N', q:"A księgowa zajmuje się tym na bieżąco czy raczej zbiorczo?"},
+    {t:'N', q:"Jest na miejscu czy zewnętrznie?"},
+    {t:'P', q:"Czy mimo to ktoś po drodze musi zebrać dane do rozliczeń?"},
+    {t:'P', q:"Czy rodzice i tak dzwonią do Pani z pytaniami o płatności?"},
+    {t:'P', q:"Czy zdarza się, że księgowa wraca z pytaniami lub brakami?"},
+    {t:'S', q:"Gdyby księgowa dostawała wszystko gotowe i kompletne, co by to Pani zdjęło z głowy?"},
+    {t:'S', q:"Czy ważniejsze byłoby mniej telefonów od rodziców czy mniej wymiany maili z księgową?"},
+  ]},
+  { section:"Komunikacja z rodzicami", icon:"💬", questions:[
+    {t:'N', q:"Z jakich narzędzi korzystacie jeżeli chodzi o komunikację z rodzicami?"},
+    {t:'N', q:"A ile takich grup z rodzicami Pani teraz prowadzi – jedna, kilka?"},
+    {t:'P', q:"Jak często rodzice piszą prywatnie zamiast na grupie?"},
+    {t:'P', q:"Czy wiadomości mieszają się z prywatnymi rozmowami na telefonie?"},
+    {t:'P', q:"Czy zdarza się, że rodzice piszą wieczorami albo w weekend?"},
+    {t:'S', q:"A gdyby mogła Pani jednym kliknięciem wysłać informację i mieć pewność, że każdy rodzic ją zobaczył – co by to Pani dało?"},
+  ]},
+  { section:"Catering", icon:"🍽️", questions:[
+    {t:'N', q:"Korzystacie z cateringu czy własnej kuchni?"},
+    {t:'N', q:"Kto u Was zgłasza liczby posiłków do cateringu?"},
+    {t:'N', q:"Do której godziny rodzice muszą zgłosić nieobecność?"},
+    {t:'P', q:"Czy zdarza się, że rodzic zgłosi nieobecność za późno?"},
+    {t:'P', q:"Jak często liczby do cateringu się nie zgadzają?"},
+    {t:'P', q:"Gdy zgłoszenie jest po terminie – kto bierze koszt na siebie?"},
+    {t:'S', q:"Gdyby system sam zamykał zgłoszenia i liczył posiłki, co by to najbardziej uprościło?"},
+    {t:'S', q:"Czy ważniejsze byłoby mniej strat na cateringu czy mniej ręcznej kontroli?"},
+  ]},
+  { section:"Dzienniki", icon:"📓", questions:[
+    {t:'N', q:"W jaki sposób prowadzicie dzienniki – papierowo czy w systemie?"},
+    {t:'N', q:"Kto odpowiada za uzupełnianie dzienników – każdy nauczyciel czy jedna osoba?"},
+    {t:'N', q:"Czy wszystko musi być wpisane tego samego dnia?"},
+    {t:'N', q:"Gdy trzeba coś poprawić lub uzupełnić – kto się tym zajmuje?"},
+    {t:'P', q:"Czy zdarza się, że coś trzeba uzupełniać po godzinach?"},
+    {t:'P', q:"Czy nauczyciele odkładają wpisy na później?"},
+    {t:'P', q:"Czy bywa, że brakuje wpisów i trzeba do nich wracać?"},
+    {t:'P', q:"Czy takie sytuacje powodują nadgodziny albo frustrację zespołu?"},
+    {t:'P', q:"Czy miały miejsce sytuacje stresowe przy kontroli lub audycie?"},
+    {t:'S', q:"Gdyby wpisy robiły się automatycznie na podstawie obecności, o ile łatwiej pracowałoby się kadrze?"},
+    {t:'S', q:"Czy ważniejsze byłoby mniej poprawek czy mniej pracy po godzinach?"},
+  ]},
+  { section:"Dokumenty", icon:"📋", questions:[
+    {t:'N', q:"Skąd dziś bierzecie wzory dokumentów – regulaminy, zgody, procedury?"},
+    {t:'N', q:"Macie swoje gotowe wzory czy każdorazowo coś dopasowujecie?"},
+    {t:'N', q:"Gdy pojawia się kontrola, kto sprawdza kompletność dokumentów?"},
+    {t:'N', q:"Czy wykupuje Pani jakieś dodatkowe wzory dokumentów? np. epedagogika"},
+    {t:'N', q:"Czy doszkala Pani w jakiś sposób swoją kadrę?"},
+    {t:'P', q:"Czy zdarza się, że trzeba coś poprawiać pod nowe wytyczne albo kontrole?"},
+    {t:'P', q:"Ile czasu zajmuje przygotowanie nowego dokumentu od zera?"},
+    {t:'P', q:"Czy macie pewność, że wszystkie wzory są aktualne?"},
+    {t:'P', q:"Czy to są sytuacje raczej spokojne czy stresujące?"},
+    {t:'P', q:"Czy bywa, że coś trzeba poprawiać na ostatnią chwilę?"},
+    {t:'S', q:"Gdyby wszystkie aktualne wzory były w jednym miejscu, co by to Pani najbardziej uprościło?"},
+    {t:'S', q:"Czy ważniejsze byłoby bezpieczeństwo przy kontrolach czy oszczędność czasu?"},
+  ]},
+];
+
+var Q_DOT   = { N:'#60a5fa', P:'#fbbf24', S:'#34d399' };
+var Q_BG    = { N:'#eff6ff', P:'#fffbeb', S:'#f0fdf4' };
+var Q_COLOR = { N:'#1d4ed8', P:'#b45309', S:'#047857' };
+
+function renderPytania() {
+  var list = document.getElementById('q-list');
+  list.innerHTML = '';
+  QUESTIONS.forEach(function(sec, i) {
+    var isOpen = openQ.indexOf(i) !== -1;
+    var wrap = document.createElement('div');
+    wrap.className = 'bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden';
+
+    var hdr = document.createElement('button');
+    hdr.className = 'w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 text-left';
+    hdr.innerHTML =
+      '<div class="flex items-center gap-3">' +
+        '<span style="font-size:1.25rem">' + sec.icon + '</span>' +
+        '<span class="font-semibold text-gray-800 text-sm">' + sec.section + '</span>' +
+        '<span class="text-xs text-gray-400">(' + sec.questions.length + ')</span>' +
+      '</div>' +
+      '<svg style="width:16px;height:16px;color:#9ca3af;transform:' + (isOpen ? 'rotate(180deg)' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
+    hdr.setAttribute('data-sec', i);
+    hdr.onclick = function() {
+      var si = parseInt(this.getAttribute('data-sec'));
+      var pos = openQ.indexOf(si);
+      if (pos !== -1) openQ.splice(pos, 1);
+      else openQ.push(si);
+      renderPytania();
+    };
+
+    var body = document.createElement('div');
+    if (!isOpen) body.classList.add('hidden');
+    sec.questions.forEach(function(item) {
+      var row = document.createElement('div');
+      row.className = 'q-row flex items-start gap-3 px-5 py-3 border-t border-gray-50';
+      row.style.background = Q_BG[item.t];
+      row.innerHTML =
+        '<span style="width:8px;height:8px;border-radius:50%;background:' + Q_DOT[item.t] + ';flex-shrink:0;margin-top:6px;display:inline-block"></span>' +
+        '<p style="font-size:0.875rem;color:#374151;line-height:1.6;flex:1">' + item.q + '</p>' +
+        '<span style="font-size:0.75rem;font-weight:700;color:' + Q_COLOR[item.t] + ';flex-shrink:0;margin-top:2px">' + item.t + '</span>';
+      body.appendChild(row);
+    });
+
+    wrap.appendChild(hdr);
+    wrap.appendChild(body);
+    list.appendChild(wrap);
+  });
+}
+
+// ── WZORY ────────────────────────────────────────────────────────────────────
+var TEMPLATES = [
+  { type:"SMS", title:"Przypomnienie o spotkaniu",
+    text:"Dzień dobry, Pani [X].\n\nPrzypominam o dzisiejszym spotkaniu o godzinie [X] z [X].\n\nDo zobaczenia!\n\n[Imię] z LiveKid" },
+  { type:"SMS", title:"Przypomnienie o spotkaniu online",
+    text:"Dzień dobry, Pani [X].\n\nWidzimy się dzisiaj o godzinie [X] pod linkiem wysyłanym na maila.\n\nDo zobaczenia!\n\n[Imię] z LiveKid" },
+  { type:"SMS", title:"Brak kontaktu",
+    text:"Dzień dobry, Pani [X].\n\nKontaktowałem się kilkukrotnie, jednak bez powodzenia. Domyślam się, że ma Pani sporo na głowie, a nie chciałbym przeszkadzać Pani w codziennych obowiązkach.\n\nKiedy najlepiej się z Panią kontaktować?\n\nPozdrawiam serdecznie,\n[Imię] z LiveKid" },
+];
+
+function renderWzory() {
+  var list = document.getElementById('wzory-list');
+  list.innerHTML = '';
+  TEMPLATES.forEach(function(tpl, i) {
+    var card = document.createElement('div');
+    card.className = 'bg-white border border-gray-100 rounded-2xl p-5 shadow-sm';
+    var lines = tpl.text.split('\n');
+    var html = '';
+    lines.forEach(function(line) {
+      if (line === '') html += '<br/>';
+      else html += '<p style="font-size:0.875rem;color:#374151;line-height:1.7">' + line + '</p>';
+    });
+    card.innerHTML =
+      '<div class="flex items-center justify-between mb-3">' +
+        '<div class="flex items-center gap-2">' +
+          '<span style="background:#ff6b35;color:white;font-size:0.7rem;font-weight:700;padding:2px 9px;border-radius:999px">' + tpl.type + '</span>' +
+          '<h3 class="font-semibold text-gray-800 text-sm">' + tpl.title + '</h3>' +
+        '</div>' +
+        '<button onclick="copyWzor(' + i + ',this)" style="border:1.5px solid #ff6b35;color:#ff6b35;font-size:0.75rem;font-weight:600;padding:4px 14px;border-radius:999px;background:white">Kopiuj</button>' +
+      '</div>' +
+      '<div style="background:#fff7f4;border-radius:12px;padding:14px 16px">' + html + '</div>';
+    list.appendChild(card);
+  });
+}
+
+function copyWzor(i, btn) {
+  navigator.clipboard.writeText(TEMPLATES[i].text).then(function() {
+    btn.textContent = 'Skopiowano!';
+    setTimeout(function() { btn.textContent = 'Kopiuj'; }, 2000);
+  });
+}
+
+// ── ARGUMENTY ────────────────────────────────────────────────────────────────
+var OBJECTIONS = [
+  { title:"Za dużo pracy dla opiekunek/nauczycieli",
+    text:"Rozumiem pani obawy. 100% właścicieli i dyrektorów, z którymi na ten temat rozmawiam ma podobne odczucia. Aplikacja jest czymś nowym, jeszcze niezbyt często spotykanym. Ja w tym momencie pokazałem pani całą aplikację — zaznaczanie obecności, umieszczanie ogłoszeń, komunikację z rodzicem, zliczanie posiłków, rozliczenia rodziców, postowanie zdjęć w 15 minut… To musi wydawać się dużo! Teraz najlepszym rozwiązaniem jest po prostu przetestowanie aplikacji w codziennej pracy. Proszę mi uwierzyć — kliknięcie zawsze będzie szybsze niż napisanie wiadomości, jeśli wcześniej nie szukaliśmy długopisu :D" },
+  { title:"Zaczniemy na spokojnie od września",
+    text:"Rozumiem skąd ta decyzja — wrzesień to początek roku szkolnego. Jeszcze w zeszłym roku powiedziałbym, że się zgadzam. Niestety doświadczenia pokazały, że to nienajlepszy pomysł. Czy pamięta pani wrzesień w zeszłym roku? [PAUZA] Nowi rodzice, adaptacje… To czas, w którym wszystkie panie są skupione na dzieciach i ich rodzicach. Placówki, które w zeszłym roku zaczęły we wrześniu musiały niestety powtarzać testy, gdyż dziecko jest najważniejsze. Kiedy jest tak dużo pracy z dziećmi jak we wrześniu, aplikacja idzie na bok, jeśli wcześniej nie wyrobiły sobie panie nawyków. Dlatego teraz wszystkie placówki pozajmowały nam terminy w sierpniu. Chcą być gotowi na przyjście nowych rodziców i ich pytania. Panie przeszkolone z aplikacji w sierpniu na spokojnie będą już poruszały się w aplikacji we wrześniu. Co pani uważa? Warto przygotować nauczycielki?" },
+  { title:"Nie wiem, czy mi się to przyda",
+    text:"Ja też nie wiem! :D Dlatego mamy okres testowy — by sprawdzić jak działa aplikacja w waszej placówce. Poklikać i zobaczyć. Co pani o tym myśli?" },
+  { title:"Doskonale sobie radzimy / mamy swoje systemy",
+    text:"Zgadzam się z panią w zupełności. Nie wątpię w to, że sobie pani radzi. Gdyby sobie pani nie radziła to prawdopodobnie placówki już by nie było. Tak jak kiedyś ludzie zdecydowali się przejść z liczenia na kartkach i liczydłach na program excel, bo tak jest szybciej i prościej, tak ja dzisiaj pokazuje następstwo excela — aplikację LiveKid. Spotkanie w żaden sposób nie jest zobowiązujące, a pani będzie na bieżąco z nowościami na rynku. Co pani myśli? Znajdzie pani dla mnie te 15 min?" },
+  { title:"Mamy za mało dzieci",
+    text:"Czy można zapytać ile? (Zazwyczaj odpowiadają coś powyżej 10). To wcale nie taka mała placówka! Najmniejsza placówka, z którą teraz pracujemy posiada 6-tkę dzieci i jej właścicielka, pani Monika dostrzegła wartość w posiadaniu aplikacji. Jej opinię można znaleźć na naszej stronie internetowej. Chcę, żeby pani wiedziała, że ja nie chcę pani sprzedać aplikacji przez telefon — jedynie chciałbym zaprosić na pokazanie aplikacji podczas krótkiego spotkania online. Moglibyśmy się spotkać w czwartek?" },
+  { title:"Mamy doskonały kontakt z rodzicami",
+    text:"Rozumiem panią i nie wątpię w Wasz kontakt z rodzicami. Nam również zależy na kontakcie bezpośrednim, ponieważ rodzic musi wiedzieć, że dziecko jest w odpowiednich rękach. Pytanie tylko: czy informowanie o przyniesieniu pieluszek, brakach w ubraniach czy kończącej się paście do zębów można nazwać komunikacją? W LiveKid ma pani możliwość przesyłania takich informacji przez aplikację już dwoma kliknięciami i dzięki temu pozostaje więcej czasu na tę prawdziwą, istotną komunikację o tym jak dziecko się rozwija, jak się zachowuje na zajęciach z dogoterapii, czy ma przyjaciół wśród rówieśników. Jak pani myśli? Czy znajdzie pani 15 min żeby rzucić okiem na to, z czego korzysta 4 tysiące placówek w Polsce?" },
+  { title:"Cena jest za wysoka",
+    text:"Rozumiem, że ta cena może przekraczać Wasz budżet. Nie będę ukrywał, że natrafiliśmy na ten problem ze sporą liczbą naszych klientów. Podobała im się aplikacja, ale nie mieli takiego kosztu przewidzianego w swoich budżetach. Dlatego w tamtych placówkach koszt aplikacji pokrywają rodzice. Niech pani sobie przeliczy… (tutaj dzielisz abonament przez liczbę dzieci w placówce i wychodzi kwota poniżej 10 zł). Teraz wystarczy, że podniesie pani kwotę czesnego nawet o 10 zł i jeszcze pani zarobi na aplikacji." },
+  { title:"Nie jestem zainteresowana",
+    text:"Nasi dyrektorzy najbardziej cenią nas za to, że oboje rodzice wiedzą, co się dzieje u dziecka. Zdaje sobie sprawę, że wyruszyliśmy w rynek, który może czuć obawy przed nową technologią. Skoro coś do tej pory działało, to czemu nagle to zmieniać? Kiedyś rodzice płacili gotówką, a teraz mogą realizować płatności przez Internet. Wcześniej pani placówka nie miała fanpage na fb, a teraz to jest dla pani dodatkowa metoda do kontaktu i utrzymywania relacji z rodzicami, prawda?\n\nNa pewno chce pani prowadzić prestiżową placówkę, szczególnie w oczach rodziców, ale i pracowników. Można to osiągnąć niewielkimi nakładami pracy, a przede wszystkim zdejmując z barków rutynowe obowiązki wychowawców." },
+  { title:"Wolę kartki, bo są prostsze w obsłudze",
+    text:"Zgadza się, kartka jest chyba najprostszym narzędziem z którego możemy skorzystać. Tylko jeżeli najpierw musimy na kartce zapisać informację, potem przepisać i policzyć wszystko ręcznie, jak na przykład rachunek za wyżywienie, to czy sumarycznie to było takie proste? Nauka aplikacji zajmie wam tydzień, trzeba poznać nowe narzędzie, żeby obsługa była prostsza niż kartka. Pisanie długopisem też kiedyś było dla nas wyzwaniem, ale warto było podjąć się tego trudu." },
+  { title:"Brak potrzeby — mimo zadowolenia nauczycielek",
+    text:"Co wcześniej spodobało się pani najbardziej na naszej aplikacji?\n\nJak pani czuje, co było najtrudniejsze podczas korzystania z systemu?\n\nJakie oceny miała aplikacja wśród rodziców?\n\nPani [imię], wyłóżmy karty na stół. Nie rozumiem po prostu, dlaczego mimo zadowolenia dziewczyn oraz rodziców a także pani, podjęła pani taką decyzję. Chcę tylko zrozumieć, może będę mógł pomóc. Jeżeli jednak nie zdołamy znaleźć wspólnego rozwiązania, będę wiedział, że zrobiłem wszystko co w mojej mocy." },
+  { title:"Zamykam placówkę na wakacje",
+    text:"Przyznam, że najlepszym wyjściem jest po prostu zalogowanie się i przetestowanie systemu, na przykład na 'wirtualnych dzieciach' lub jeszcze na tych, które zostały. Po pierwsze już teraz przygotowuje się pani na sytuacje, które mogą wystąpić, będzie pani znała odpowiedzi na potencjalnie pojawiające się pytania. Dodatkowo jeśli otwieracie państwo nową placówkę, to będziecie mogli od razu ustalić takie zasady, żeby łatwiej rozliczało się wam czesne, co w dłuższej perspektywie pozwoli znacznie oszczędzić czas." },
+  { title:"Nie mamy pieniędzy",
+    text:"Jasne, budżet to jest jeden z głównych powodów, które blokują placówki przed korzystaniem z aplikacji, a właściwie chyba jedyny, który na pierwszy rzut oka ciężko jest pokonać. Ja oczywiście nie będę pani namawiał, ale przyznam, że moje sumienie jako doradcy zajmującego się technologią nie pozwoli na to, żeby się poddać i nie pokazać pani chociaż tego, jak inni dyrektorzy korzystają z aplikacji.\n\nZgadzam się, współpraca z naszą firmą wymaga nakładów finansowych, ale zastanawiam się, ile jest warte dla pani kilka godzin w skali miesiąca. Nasza aplikacja oszczędza dyrektorom śmiało 10 godzin miesięcznie — to 15 zł za godzinę przy pakiecie 159 zł. Czy nie zapłaciłaby pani 15 zł za godzinę więcej w tygodniu, którą mogłaby pani poświęcić dla swoich bliskich?" },
+  { title:"Dzieci idą na wakacje, chcemy mniej płacić",
+    text:"Co sprawdzić / dowiedzieć się:\n— Czy wystawia rachunki w aplikacji?\n— Czy rodzice płacą z góry?\n— Co jeszcze wygasza na ten okres?\n— Ile dzieci? Na jak długo? Czy wrócą?\n— Czy placówka jest całkiem zamknięta?\n\nRozwiązanie, o którym pani wspomina wymaga usunięcia dzieci i dodania ich raz jeszcze. Konsekwencje: znów trzeba zapraszać rodziców i straci pani historię obecności, rozliczeń i wpłat. Przy takim działaniu aplikacja straci część danych i czeka panią powrót do kartotek papierowych." },
+  { title:"Dzieci w wakacje będzie mniej",
+    text:"Kiedy rodzic będzie chciał przyprowadzić dziecko, które nie jest zadeklarowane do chodzenia w wakacje — czy zdarza się, że w kryzysowej sytuacji próbuje się skontaktować i oddać swoją pociechę w państwa ręce?" },
+  { title:"Mam już jakiś system (konkurencja)",
+    text:"To doskonale, że pani placówka korzysta z rozwiązań dostarczanych przez technologię. W takim razie na pewno nie muszę pani przekonywać, że korzystanie z systemu jest szybsze niż metoda karteczek.\n\nKażdy system się różni, dlatego być może znalazłaby pani czas na krótką rozmowę o tym jakie funkcjonalności teraz są dla pani najważniejsze. Chętnie podpowiem, jak jeszcze bardziej można wykorzystać dostępną dziś technologię.\n\nNa bieżąco monitorujemy konkurencję. Jeśli ma pani doświadczenie w korzystaniu z innych systemów, to na pewno wie pani jakim wymaganiom powinna sprostać aplikacja. Powiedzmy takie minimum — czy w tym temacie możemy porozmawiać?" },
+  { title:"Ostatnio oferowaliście niższą cenę",
+    text:"Ma pani całkowitą rację, ostatnio też nie posiadaliśmy galerii zdjęć, grafików dla pracowników, dziennika MEN, notowania ilości zjedzonego posiłku czy snu. Naszą aplikację cały czas aktualizujemy, wprowadzamy nowe funkcje, zatrudniamy więcej osób… To wszystko wiąże się z większymi kosztami, dlatego byliśmy zmuszeni podnieść cenę. Chcemy dostarczać wam najwyższej jakości usługi, specjalistów i serwery, stąd nowa cena. Czy uważa pani, że jest ona adekwatna do wszystkich funkcji, które aktualnie posiadamy?" },
+  { title:"Myślałam, że cena była brutto",
+    text:"Przepraszam, jeśli w którymś momencie naszej rozmowy dałem pani do zrozumienia, że podana przez mnie cena jest ceną brutto. Staram się za każdym razem podkreślać fakt cen netto podczas rozmów i w wiadomościach mailowych. Jeżeli gdzieś podałem pani cenę brutto to proszę mi wybaczyć, niestety jestem tylko człowiekiem… [pauza]\n\nCena o której rozmawialiśmy, jest ceną NETTO. Podatek VAT od razu przekazujemy do urzędu skarbowego. Czy możemy dalej kontynuować nasze rozmowy?" },
+  { title:"Jak zrobicie funkcję, o którą proszę — to pogadamy",
+    text:"Rozumiem, że funkcja o której pani mówi jest bardzo istotna. Proszę tylko na chwilę postawić się w naszej sytuacji. Mamy już w naszych szeregach ponad 4000 placówek i owszem, jak zaczynaliśmy, to najmniejsza uwaga od razu była weryfikowana, bo tworzyliśmy system od podstaw. Teraz jest nam dużo ciężej — proszę sobie wyobrazić, że każda jedna placówka ma swoją małą prośbę, mamy nagle do zrobienia 4000 funkcji, nie mówiąc o rzeczach, które w tym momencie wdrażamy. Bardzo proszę o wyrozumiałość. Moim zdaniem pani pomysł jest jak najbardziej dobry, dlatego mogę umówić się tak, że dopiszę pani funkcję do listy i w odpowiednim czasie programiści zajmą się tym w przyszłości." },
+];
+
+var openArg = [];
+
+function renderArgumenty() {
+  var list = document.getElementById('arg-list');
+  list.innerHTML = '';
+  OBJECTIONS.forEach(function(obj, i) {
+    var isOpen = openArg.indexOf(i) !== -1;
+    var wrap = document.createElement('div');
+    wrap.className = 'bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden';
+
+    var hdr = document.createElement('button');
+    hdr.className = 'w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 text-left';
+    hdr.innerHTML =
+      '<span class="font-semibold text-gray-800 text-sm pr-4">' + obj.title + '</span>' +
+      '<svg style="width:16px;height:16px;color:#9ca3af;flex-shrink:0;transform:' + (isOpen ? 'rotate(180deg)' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
+    hdr.setAttribute('data-arg', i);
+    hdr.onclick = function() {
+      var ai = parseInt(this.getAttribute('data-arg'));
+      var pos = openArg.indexOf(ai);
+      if (pos !== -1) openArg.splice(pos, 1);
+      else openArg.push(ai);
+      renderArgumenty();
+    };
+
+    var body = document.createElement('div');
+    if (!isOpen) body.classList.add('hidden');
+    body.style.background = '#faf5ff';
+    var lines = obj.text.split('\n');
+    var html = '';
+    lines.forEach(function(line) {
+      if (line === '') html += '<br/>';
+      else html += '<p style="font-size:0.875rem;color:#374151;line-height:1.7;margin-bottom:0.5rem">' + line + '</p>';
+    });
+    body.innerHTML = '<div class="px-5 py-4 border-t border-purple-100">' + html + '</div>';
+
+    wrap.appendChild(hdr);
+    wrap.appendChild(body);
+    list.appendChild(wrap);
+  });
+}
+
+// ── KONKURENCJA ──────────────────────────────────────────────────────────────
+var COMPETITORS = [
+  { name:"Inso for Parents", www:"inso.pl",
+    args:[{ text:"LiveKid współpracuje z ponad 4 tysiącami placówek w Polsce — to największa baza klientów na rynku. Jeśli Pani placówka korzysta z Inso, warto zapytać: czy inne przedszkola w okolicy już przeszły na LiveKid? Referencje lokalne działają lepiej niż jakakolwiek reklama.", date:"20.04.2026" }] },
+  { name:"Kidmi", www:"kidmi.pl",
+    args:[{ text:"Kidmi to stosunkowo młoda aplikacja bez udokumentowanej historii na rynku. LiveKid działa od ponad 10 lat i ma sprawdzone wdrożenia w tysiącach placówek — to argument dla dyrektora, który nie chce ryzykować ze start-upem.", date:"20.04.2026" }] },
+  { name:"Start Edu", www:"startedu.pl",
+    args:[{ text:"Start Edu jest zbudowany z myślą o szkołach — przedszkola to dla nich segment poboczny. LiveKid powstał wyłącznie z myślą o przedszkolach i żłobkach, więc każda funkcja jest zaprojektowana pod realia pracy dyrektora placówki małego dziecka.", date:"20.04.2026" }] },
+  { name:"KidsTime", www:"kidstime.edu.pl",
+    args:[{ text:"KidsTime to mniejszy gracz z ograniczoną rozpoznawalnością. Warto zapytać dyrektora: czy ich znajome placówki też korzystają z KidsTime? W przypadku LiveKid — ponad 4 tysiące placówek to sieć wzajemnych poleceń, z których można korzystać.", date:"20.04.2026" }] },
+  { name:"Kidplace", www:"kidplace.pl",
+    args:[{ text:"Kidplace stawia głównie na moduł bezpieczeństwa odbioru dzieci. LiveKid oferuje to samo, ale jest częścią kompleksowego systemu obejmującego rozliczenia, dziennik, komunikację i catering — wszystko w jednym miejscu zamiast kilku narzędzi.", date:"20.04.2026" }] },
+  { name:"MojePrzedszkole.pl", www:"mojeprzedszkole.pl",
+    args:[{ text:"MojePrzedszkole.pl to jeden ze starszych systemów na rynku — i niestety to widać. Interfejs i aplikacja mobilna nie nadążają za nowoczesnymi standardami. LiveKid stale się rozwija, a nowe funkcje wdrażamy regularnie bez dodatkowych kosztów.", date:"20.04.2026" }] },
+  { name:"Progman iPrzedszkole", www:"wolterskluwer.com",
+    args:[{ text:"Progman to narzędzie korporacyjne zaprojektowane dla dużych struktur. Dla prywatnego przedszkola to często przerost formy nad treścią — wysokie koszty wdrożenia, skomplikowana obsługa. LiveKid jest gotowy do pracy w dzień wdrożenia.", date:"20.04.2026" }] },
+  { name:"KinderCRM", www:"kindercrm.pl",
+    args:[{ text:"KinderCRM to wyłącznie CRM do rekrutacji dzieci — nie zastępuje systemu zarządzania placówką. Dyrektor korzystający z KinderCRM i tak potrzebuje osobnego systemu do dziennika, rozliczeń i komunikacji. LiveKid łączy to wszystko w jednym.", date:"20.04.2026" }] },
+  { name:"Kidsview", www:"kidsview.pl",
+    args:[{ text:"Kidsview ma dobre oceny, ale znacznie mniejszą bazę klientów. Dla dyrektora, który chce wiedzieć czy inwestycja jest bezpieczna, liczba 4 tysięcy placówek korzystających z LiveKid to konkretny argument — aplikacja jest sprawdzona w boju.", date:"20.04.2026" }] },
+  { name:"Kidsup", www:"kidsup.pl",
+    args:[{ text:"Kidsup pozycjonuje się jako zaawansowane narzędzie, co często oznacza wyższy próg wejścia dla małych placówek. LiveKid jest równie rozbudowany, ale wdrożenie zajmuje jeden dzień, a nauczycielki uczą się obsługi samodzielnie w ciągu tygodnia.", date:"20.04.2026" }] },
+  { name:"MobiDziennik", www:"mobidziennik.pl",
+    args:[{ text:"MobiDziennik wyrósł na rynku szkolnym i dopiero rozszerza się na przedszkola. To widać w produkcie — moduły dla rodziców i rozliczenia są wtórne wobec funkcji typowo szkolnych. LiveKid od pierwszego dnia budowany był wyłącznie dla placówek małego dziecka.", date:"20.04.2026" }] },
+  { name:"KidConnect", www:"kidconnect.pl",
+    args:[{ text:"KidConnect to jeden z mniejszych graczy na rynku z ograniczonym modułem finansowym. Dyrektorzy, którzy przeszli do LiveKid, najczęściej wskazują automatyczne rozliczenia czesnego jako funkcję, której najbardziej im brakowało w poprzednim systemie.", date:"20.04.2026" }] },
+  { name:"Stoperek", www:"stoperek.pl",
+    args:[{ text:"Stoperek ma mocny moduł finansowy, ale słabą aplikację mobilną i ograniczone funkcje komunikacji z rodzicami. Dzisiejsi rodzice oczekują kontaktu w czasie rzeczywistym przez telefon — LiveKid spełnia te oczekiwania kompleksowo.", date:"20.04.2026" }] },
+  { name:"KolorowyZegar", www:"kolorowyzegar.pl",
+    args:[{ text:"KolorowyZegar to nowy gracz bez potwierdzonej historii wdrożeń na dużą skalę. Przed decyzją o zmianie systemu dyrektor powinien zadać sobie pytanie: kto obsłuży mnie o 8 rano gdy aplikacja nie działa? LiveKid ma dedykowane wsparcie z udokumentowanymi czasami reakcji.", date:"20.04.2026" }] },
+  { name:"4Parents", www:"4parents.education",
+    args:[{ text:"4Parents jest liderem w segmencie żłobków, ale ich produkt nie był projektowany z myślą o przedszkolach powyżej 3. roku życia — brakuje zaawansowanego dziennika pedagogicznego i dokumentacji wymaganej przez MEN. LiveKid obsługuje zarówno żłobki, jak i pełnoprawne przedszkola.", date:"20.04.2026" }] },
+];
+
+var openKonk = [];
+
+function polishDate() {
+  var d = new Date();
+  var dd = String(d.getDate()).padStart(2,'0');
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  var yyyy = d.getFullYear();
+  return dd + '.' + mm + '.' + yyyy;
+}
+
+function saveKonkArg(i) {
+  var ta = document.getElementById('konk-ta-' + i);
+  var val = ta.value.trim();
+  if (!val) return;
+  COMPETITORS[i].args.push({ text: val, date: polishDate() });
+  ta.value = '';
+  renderKonkurencja();
+}
+
+function deleteKonkArg(ci, ai) {
+  COMPETITORS[ci].args.splice(ai, 1);
+  renderKonkurencja();
+}
+
+function renderKonkurencja() {
+  var list = document.getElementById('konk-list');
+  list.innerHTML = '';
+  COMPETITORS.forEach(function(comp, i) {
+    var isOpen = openKonk.indexOf(i) !== -1;
+    var wrap = document.createElement('div');
+    wrap.className = 'bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden';
+
+    var count = comp.args.length;
+    var hdr = document.createElement('button');
+    hdr.className = 'w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 text-left';
+    hdr.innerHTML =
+      '<div class="flex items-center gap-2">' +
+        '<span class="font-semibold text-gray-800 text-sm">' + comp.name + '</span>' +
+        '<span style="font-size:0.7rem;color:#9ca3af">' + comp.www + '</span>' +
+        '<span style="background:#fee2e2;color:#e11d48;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:999px">' + count + ' ' + (count === 1 ? 'argument' : 'argumenty') + '</span>' +
+      '</div>' +
+      '<svg style="width:16px;height:16px;color:#9ca3af;flex-shrink:0;transform:' + (isOpen ? 'rotate(180deg)' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
+    hdr.setAttribute('data-konk', i);
+    hdr.onclick = function() {
+      var ki = parseInt(this.getAttribute('data-konk'));
+      var pos = openKonk.indexOf(ki);
+      if (pos !== -1) openKonk.splice(pos, 1);
+      else openKonk.push(ki);
+      renderKonkurencja();
+    };
+
+    var body = document.createElement('div');
+    if (!isOpen) body.classList.add('hidden');
+
+    var argsHtml = '';
+    if (comp.args.length === 0) {
+      argsHtml = '<p style="font-size:0.85rem;color:#9ca3af;font-style:italic;padding:8px 0">Brak argumentów — dodaj pierwszy poniżej.</p>';
+    } else {
+      comp.args.forEach(function(arg, ai) {
+        argsHtml +=
+          '<div style="background:#fef9f0;border:1px solid #fde68a;border-radius:12px;padding:12px 14px;margin-bottom:10px;position:relative">' +
+            '<p style="font-size:0.875rem;color:#374151;line-height:1.7;padding-right:24px">' + arg.text + '</p>' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">' +
+              '<span style="font-size:0.7rem;color:#9ca3af">Dodano: ' + arg.date + '</span>' +
+              '<button onclick="deleteKonkArg(' + i + ',' + ai + ')" style="font-size:0.75rem;color:#d1d5db;hover:color:#ef4444">✕</button>' +
+            '</div>' +
+          '</div>';
+      });
+    }
+
+    body.innerHTML =
+      '<div class="px-5 py-4 border-t border-gray-100">' +
+        '<p style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#e11d48;margin-bottom:10px">Argumenty sprzedażowe</p>' +
+        argsHtml +
+        '<div style="margin-top:12px">' +
+          '<textarea id="konk-ta-' + i + '" rows="3" placeholder="Wpisz nowy argument sprzedażowy..." style="width:100%;border:1.5px solid #e5e7eb;border-radius:12px;padding:10px 14px;font-size:0.85rem;resize:none;outline:none;font-family:inherit"></textarea>' +
+          '<button onclick="saveKonkArg(' + i + ')" style="margin-top:8px;background:#e11d48;color:white;font-size:0.8rem;font-weight:600;padding:7px 18px;border-radius:999px;border:none;cursor:pointer">+ Dodaj argument</button>' +
+        '</div>' +
+      '</div>';
+
+    wrap.appendChild(hdr);
+    wrap.appendChild(body);
+    list.appendChild(wrap);
+  });
+}
+
+// ── MOCNE STRONY ─────────────────────────────────────────────────────────────
+var MOCNE_CARDS = [
+  { title:"Dziennik elektroniczny",
+    badge:"📓 Koniec z papierem", badgeStyle:"background:#fce7f3;color:#9d174d",
+    img:"https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=600&q=80",
+    args:[
+      "Prosty zapis, łatwa obsługa. LiveKid pilnuje kompletności wpisów, a nauczycielki poświęcają czas dzieciom — nie biurokracji.",
+      "Prosty zapis, łatwa obsługa. Wpis zajmuje chwilę, a system pilnuje kompletności. Mniej papieru, mniej stresu, więcej czasu na to, co ważne.",
+      "__CALC__"
+    ] },
+  { title:"Komunikacja z rodzicami",
+    badge:"💬 Szybciej, nie zimniej", badgeStyle:"background:#e0f2fe;color:#0369a1",
+    img:"https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80",
+    args:[
+      "LiveKid nie zastępuje kontaktu osobistego — upraszcza i przyspiesza komunikację. Jedno kliknięcie zamiast dziesięciu telefonów. Dyrektor zostaje ciepłym centrum placówki.",
+      "Nie chcemy zabrać komunikacji z rodzicami — chcemy ją wzbogacić o to, co najważniejsze. Dyrektor zostaje ciepłym centrum placówki.",
+      "Rodzice kochają naszą aplikację i częściej na nią wchodzą niż na Instagrama i Facebooka. To najlepsza wizytówka placówki w ich oczach.",
+      "Rodzice, zastanawiając się nad wyborem przedszkola i widząc LiveKid, chętniej podejmują decyzję. Nowoczesna placówka to argument, który działa jeszcze przed pierwszą rozmową."
+    ] },
+  { title:"Automatyzacja cateringu",
+    badge:"⏱️ Godziny odzyskane każdego tygodnia", badgeStyle:"background:#fee2e2;color:#b91c1c",
+    img:"https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80",
+    args:[
+      "LiveKid automatycznie zlicza obecności i wysyła wiadomości do cateringu — o ustalonej godzinie, bez udziału personelu. Koniec z ręcznym liczeniem i wysyłaniem SMS-ów każdego ranka.",
+      "Koniec z ręcznym liczeniem i wysyłaniem wiadomości do cateringu. System robi to automatycznie — o ustalonej godzinie, bez udziału personelu.",
+      "Catering codziennie przyjeżdża pod drzwi — a jedyne informacje, jakie wymieniacie SMS-owo, to ewentualnie pytanie: \u201Ekiedy b\u0119d\u0105?\u201D. Reszt\u0105 zajmuje si\u0119 LiveKid."
+    ] },
+  { title:"Aktualności z oświaty",
+    badge:"📰 Zawsze na bieżąco", badgeStyle:"background:#dbeafe;color:#1d4ed8",
+    img:"https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&q=80",
+    args:[
+      "Zmiany w prawie oświatowym, nowe wytyczne MEN, aktualności z rynku edukacji — LiveKid dostarcza bieżące informacje w jednym miejscu. Placówka zawsze przygotowana, nigdy zaskoczona kontrolą.",
+      "Zmiany w prawie, nowe wytyczne MEN, aktualności z rynku edukacji — wszystko w jednym miejscu. Zawsze przygotowani, nigdy zaskoczeni.",
+      "Przygotowanie do nadchodzących zmian z pomocą LiveKid. Żadnych niespodzianek podczas kontroli — zawsze o krok do przodu."
+    ] },
+  { title:"Konspekty, karty pracy i inspiracje",
+    badge:"📚 Gotowe. Na cały rok.", badgeStyle:"background:#d1fae5;color:#065f46",
+    img:"https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=600&q=80",
+    args:[
+      "Placówki często wydają pieniądze na materiały wydawnictw — LiveKid ma gotowe konspekty, karty pracy i inspiracje na cały rok bezpośrednio w aplikacji. Dobre jakościowo, dopasowane do pór roku i cyklu przedszkolnego. Bez szukania w sieci.",
+      "Bez szukania w sieci, bez marnowania wieczorów. Gotowe materiały na każdy dzień i każdą porę roku — wprost w aplikacji. Nauczycielki mają więcej czasu dla dzieci.",
+      "Zapewniam Panią, że nauczycielki znajdą tam cudowne inspiracje, które świetnie uzupełnią to, co robią na co dzień. Gotowe pomysły na każdą porę roku — bez szukania po nocach."
+    ] },
+  { title:"Prywatny opiekun placówki",
+    badge:"📞 Jedna osoba. Jeden telefon.", badgeStyle:"background:#ede9fe;color:#7c3aed",
+    img:"https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&q=80",
+    args:[
+      "LiveKid przydziela każdej placówce prywatnego opiekuna — jedną osobę, jeden numer. Zna specyfikę placówki, pomaga w trudnościach i przeprowadza przez wdrożenie aplikacji krok po kroku.",
+      "Jedna osoba. Jeden numer telefonu. Zna Twoją placówkę, pomaga przy trudnościach i przeprowadza przez wdrożenie aplikacji krok po kroku. Nie zostawiamy Cię samej."
+    ] },
+  { title:"Porada prawna",
+    badge:"💰 Wartość 100–170 zł / szt.", badgeStyle:"background:#fef3c7;color:#b45309",
+    img:"https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&q=80",
+    args:[
+      "Prawo oświatowe zmienia się często — zbyt często, żeby śledzić to samodzielnie. LiveKid daje dostęp do eksperta prawnego w cenie 0 zł. Zamiast 100–170 zł za konsultację — po prostu pytają.",
+      "Prawo oświatowe zmienia się często — zbyt często, żeby śledzić to samodzielnie. W LiveKid masz dostęp do eksperta prawnego w cenie 0 zł. Zamiast 100–170 zł za konsultację — po prostu pytasz.",
+      "Hak sprzeda\u017Cowy: \u201EIle razy zdarzy\u0142o si\u0119 Pani zasi\u0119gn\u0105\u0107 porady prawnej w o\u015Bwiacie?\u201D \u2014 je\u015Bli cho\u0107 raz, LiveKid to realna oszcz\u0119dno\u015B\u0107. Ekspert dost\u0119pny od r\u0119ki, bez umawiania, bez faktury.",
+      "Dostępność od ręki — żadnego czekania na wizytę. Rzetelne dane od specjalistów, nie z przypadkowych forów. Spokój dyrektora, że każda decyzja opiera się na faktach."
+    ] },
+];
+
+var mocneIdx = [];
+for (var _mi = 0; _mi < MOCNE_CARDS.length; _mi++) mocneIdx.push(0);
+
+var dzTeachers = 5, dzHours = 4;
+function dzCalc(delta, field) {
+  if (field === 0) dzTeachers = Math.max(1, Math.min(10, dzTeachers + delta));
+  else             dzHours    = Math.max(1, Math.min(8,  dzHours    + delta));
+  var t = document.getElementById('dz-t');
+  var h = document.getElementById('dz-h');
+  var r = document.getElementById('dz-r');
+  if (t) t.textContent = dzTeachers;
+  if (h) h.textContent = dzHours;
+  if (r) r.textContent = (dzTeachers * dzHours) + ' godz.';
+}
+
+function prevMocne(i) {
+  if (mocneIdx[i] > 0) { mocneIdx[i]--; renderMocneStrony(); }
+}
+function nextMocne(i) {
+  if (mocneIdx[i] < MOCNE_CARDS[i].args.length - 1) { mocneIdx[i]++; renderMocneStrony(); }
+}
+
+function renderMocneStrony() {
+  var grid = document.getElementById('mocne-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  MOCNE_CARDS.forEach(function(card, i) {
+    var ai    = mocneIdx[i];
+    var text  = card.args[ai] || '';
+    var total = card.args.length;
+    var hasPrev = ai > 0;
+    var hasNext = ai < total - 1;
+    var accentColor = card.badgeStyle.match(/color:([^;]+)/);
+    var accent = accentColor ? accentColor[1].trim() : '#0891b2';
+
+    var dotsHtml = '';
+    if (total > 1) {
+      for (var d = 0; d < total; d++) {
+        dotsHtml += '<span style="display:inline-block;width:' + (d===ai?'16px':'6px') + ';height:6px;border-radius:999px;background:' + (d===ai?accent:'#d1d5db') + ';transition:all 0.2s;margin:0 2px"></span>';
+      }
+    }
+
+    var bodyContent;
+    if (text === '__CALC__') {
+      bodyContent =
+        '<div style="text-align:center;padding:4px 0">' +
+          '<p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:' + accent + ';margin-bottom:10px">Kalkulator czasu</p>' +
+          '<div style="display:flex;gap:10px;margin-bottom:10px">' +
+            '<div style="flex:1;background:#fdf2f8;border-radius:12px;padding:10px 6px">' +
+              '<p style="font-size:0.68rem;color:#9d174d;margin-bottom:6px;font-weight:600">Nauczycielek</p>' +
+              '<div style="display:flex;align-items:center;justify-content:center;gap:6px">' +
+                '<button onclick="dzCalc(-1,0)" style="width:24px;height:24px;border-radius:50%;border:1.5px solid #f9a8d4;background:white;cursor:pointer;font-size:1rem;color:#9d174d;line-height:1">−</button>' +
+                '<span id="dz-t" style="font-size:1.6rem;font-weight:900;color:#9d174d;min-width:28px;display:inline-block">' + dzTeachers + '</span>' +
+                '<button onclick="dzCalc(1,0)" style="width:24px;height:24px;border-radius:50%;border:1.5px solid #f9a8d4;background:white;cursor:pointer;font-size:1rem;color:#9d174d;line-height:1">+</button>' +
+              '</div>' +
+            '</div>' +
+            '<div style="flex:1;background:#fdf2f8;border-radius:12px;padding:10px 6px">' +
+              '<p style="font-size:0.68rem;color:#9d174d;margin-bottom:6px;font-weight:600">Godz. / tydzień</p>' +
+              '<div style="display:flex;align-items:center;justify-content:center;gap:6px">' +
+                '<button onclick="dzCalc(-1,1)" style="width:24px;height:24px;border-radius:50%;border:1.5px solid #f9a8d4;background:white;cursor:pointer;font-size:1rem;color:#9d174d;line-height:1">−</button>' +
+                '<span id="dz-h" style="font-size:1.6rem;font-weight:900;color:#9d174d;min-width:28px;display:inline-block">' + dzHours + '</span>' +
+                '<button onclick="dzCalc(1,1)" style="width:24px;height:24px;border-radius:50%;border:1.5px solid #f9a8d4;background:white;cursor:pointer;font-size:1rem;color:#9d174d;line-height:1">+</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="background:#9d174d;color:white;border-radius:12px;padding:10px 8px">' +
+            '<p style="font-size:0.68rem;opacity:0.8;margin-bottom:2px">Czas odzyskany tygodniowo</p>' +
+            '<p id="dz-r" style="font-size:1.8rem;font-weight:900;margin:0">' + (dzTeachers * dzHours) + ' godz.</p>' +
+          '</div>' +
+        '</div>';
+    } else {
+      bodyContent = '<p class="benefit-text" style="min-height:72px">' + text + '</p>';
+    }
+
+    var isFav = mocneFavs.indexOf(i) !== -1;
+    var el = document.createElement('div');
+    el.className = 'benefit-card';
+    el.innerHTML =
+      '<img class="benefit-img" src="' + card.img + '" alt="' + card.title + '" onerror="this.style.display=\'none\'"/>' +
+      '<div class="benefit-body">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">' +
+          '<span class="benefit-badge" style="' + card.badgeStyle + '">' + card.badge + '</span>' +
+          '<button onclick="toggleMocneFav(' + i + ')" style="font-size:1.3rem;line-height:1;background:none;border:none;cursor:pointer;color:' + (isFav ? '#f59e0b' : '#d1d5db') + ';padding:0;margin-left:4px">★</button>' +
+        '</div>' +
+        '<div class="benefit-title">' + card.title + '</div>' +
+        bodyContent +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:8px">' +
+          '<button onclick="prevMocne(' + i + ')" style="flex-shrink:0;width:36px;height:36px;border-radius:10px;border:none;background:' + (hasPrev?accent:'#e5e7eb') + ';cursor:' + (hasPrev?'pointer':'default') + ';color:' + (hasPrev?'white':'#9ca3af') + ';font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:opacity .15s" ' + (hasPrev?'':'disabled') + '>' +
+            '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>' +
+          '</button>' +
+          '<div style="display:flex;align-items:center;gap:4px">' + dotsHtml + '</div>' +
+          '<button onclick="nextMocne(' + i + ')" style="flex-shrink:0;width:36px;height:36px;border-radius:10px;border:none;background:' + (hasNext?accent:'#e5e7eb') + ';cursor:' + (hasNext?'pointer':'default') + ';color:' + (hasNext?'white':'#9ca3af') + ';font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:opacity .15s" ' + (hasNext?'':'disabled') + '>' +
+            '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>' +
+          '</button>' +
+        '</div>' +
+      '</div>';
+    grid.appendChild(el);
+  });
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+renderCard();
+</script>
+</body>
+</html>
