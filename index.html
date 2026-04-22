@@ -6,9 +6,19 @@
   <title>SDR Starter Pack — LiveKid</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    html {
+      scrollbar-gutter: stable;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
       min-height: 100vh;
+      background-color: #eef2ff;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
       background-color: #eef2ff;
       background-image:
         radial-gradient(ellipse 70% 60% at 5%  10%,  rgba(0,208,132,0.30)  0%, transparent 100%),
@@ -16,7 +26,6 @@
         radial-gradient(ellipse 65% 60% at 92% 92%,  rgba(122,0,223,0.22)  0%, transparent 100%),
         radial-gradient(ellipse 60% 55% at 5%  95%,  rgba(225,29,72,0.20)  0%, transparent 100%),
         radial-gradient(ellipse 50% 50% at 50% 50%,  rgba(255,107,53,0.10) 0%, transparent 100%);
-      background-attachment: fixed;
     }
     .script-card { height: 320px; overflow-y: auto; }
     .script-card::-webkit-scrollbar { width: 3px; }
@@ -45,16 +54,87 @@
 </head>
 <body class="min-h-screen">
 
+<!-- EKRAN LOGOWANIA -->
+<style>
+  #login-screen { position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;padding:16px;
+    background-color:#eef2ff;
+    background-image:
+      radial-gradient(ellipse 70% 60% at 5%  10%,  rgba(0,208,132,0.30)  0%,transparent 100%),
+      radial-gradient(ellipse 60% 55% at 95% 5%,   rgba(6,147,227,0.28)  0%,transparent 100%),
+      radial-gradient(ellipse 65% 60% at 92% 92%,  rgba(122,0,223,0.22)  0%,transparent 100%),
+      radial-gradient(ellipse 60% 55% at 5%  95%,  rgba(225,29,72,0.20)  0%,transparent 100%);
+  }
+  .login-card { background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-radius:28px;padding:40px 32px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,0.14); }
+  .profile-chip { display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1.5px solid #e5e7eb;background:white;cursor:pointer;transition:all .15s;width:100%; }
+  .profile-chip:hover { border-color:#0891b2;background:#f0f9ff; }
+  .profile-chip.selected { border-color:#0891b2;background:#e0f2fe; }
+  .profile-avatar { width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;color:white;flex-shrink:0; }
+  .pin-input { width:100%;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 16px;font-size:1.1rem;text-align:center;letter-spacing:0.3em;outline:none;font-family:inherit;transition:border-color .15s; }
+  .pin-input:focus { border-color:#0891b2; }
+  .login-btn { width:100%;padding:13px;border-radius:12px;border:none;font-size:0.95rem;font-weight:700;cursor:pointer;background:#0891b2;color:white;transition:opacity .15s; }
+  .login-btn:hover { opacity:0.9; }
+  .login-error { font-size:0.8rem;color:#e11d48;text-align:center;margin-top:6px;min-height:18px; }
+</style>
+<div id="login-screen">
+  <div class="login-card">
+    <div style="text-align:center;margin-bottom:28px">
+      <img src="https://livekid.com/wp-content/uploads/2021/05/logo-livekid.svg" alt="LiveKid" style="height:36px;margin:0 auto 12px;display:block"
+        onerror="this.style.display='none'"/>
+      <p style="font-size:0.8rem;font-weight:600;color:#9ca3af;letter-spacing:0.05em;text-transform:uppercase">SDR Starter Pack</p>
+    </div>
+    <p style="font-size:0.8rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Wybierz profil</p>
+    <div id="profile-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px"></div>
+    <div id="pin-section" style="display:none">
+      <p style="font-size:0.8rem;font-weight:600;color:#6b7280;margin-bottom:6px" id="pin-label">Kod PIN</p>
+      <input id="pin-input" class="pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <div class="login-error" id="login-error"></div>
+      <button class="login-btn" style="margin-top:12px" onclick="doLogin()">Zaloguj się</button>
+    </div>
+  </div>
+</div>
+
 <!-- HEADER -->
-<header class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-20">
+<header class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-20" id="main-header" style="display:none">
   <div class="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
     <img src="https://livekid.com/wp-content/uploads/2021/05/logo-livekid.svg" alt="LiveKid" class="h-8"
       onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
     <span style="display:none;color:#7a00df" class="font-bold text-xl">LiveKid</span>
     <div class="w-px h-5 bg-gray-200"></div>
     <span class="text-sm font-semibold text-gray-500">SDR Starter Pack</span>
+    <div style="flex:1"></div>
+    <div id="user-badge" style="display:flex;align-items:center;gap:8px">
+      <span id="user-name-badge" style="font-size:0.8rem;font-weight:600;color:#374151"></span>
+      <button onclick="doLogout()" style="font-size:0.75rem;color:#9ca3af;background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:8px">Wyloguj</button>
+    </div>
   </div>
 </header>
+
+<!-- WYSZUKIWARKA + ZAKŁADKI + MAIN (ukryte do logowania) -->
+<div id="app-shell" style="display:none">
+<!-- WYSZUKIWARKA -->
+<style>
+  .search-wrap { position:relative; max-width:768px; margin:0 auto; padding:12px 16px 0; }
+  .search-input-wrap { display:flex; align-items:center; background:rgba(255,255,255,0.85); border:1.5px solid #e5e7eb; border-radius:14px; padding:8px 14px; gap:8px; backdrop-filter:blur(6px); box-shadow:0 2px 10px rgba(0,0,0,0.06); transition:border-color .15s; }
+  .search-input-wrap:focus-within { border-color:#0891b2; }
+  .search-input { border:none; outline:none; background:transparent; font-size:0.875rem; color:#111827; flex:1; font-family:inherit; }
+  .search-input::placeholder { color:#9ca3af; }
+  .search-dropdown { position:absolute; top:calc(100% - 4px); left:16px; right:16px; background:white; border:1.5px solid #e5e7eb; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:100; overflow:hidden; max-height:340px; overflow-y:auto; }
+  .search-result { display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; transition:background .1s; }
+  .search-result:hover { background:#f8f7ff; }
+  .search-result-cat { font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:999px; white-space:nowrap; flex-shrink:0; }
+  .search-result-label { font-size:0.875rem; color:#111827; font-weight:500; }
+  .search-empty { padding:16px 14px; font-size:0.85rem; color:#9ca3af; text-align:center; }
+  .search-clear { background:none; border:none; cursor:pointer; color:#9ca3af; font-size:1rem; padding:0; line-height:1; flex-shrink:0; }
+  .search-clear:hover { color:#374151; }
+</style>
+<div class="search-wrap">
+  <div class="search-input-wrap">
+    <svg width="16" height="16" fill="none" stroke="#9ca3af" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35"/></svg>
+    <input id="search-input" class="search-input" placeholder="Szukaj argumentu, skryptu, konkurenta…" oninput="onSearch(this.value)" onkeydown="onSearchKey(event)" autocomplete="off"/>
+    <button class="search-clear" id="search-clear" onclick="clearSearch()" style="display:none">✕</button>
+  </div>
+  <div class="search-dropdown" id="search-dropdown" style="display:none"></div>
+</div>
 
 <!-- ZAKŁADKI -->
 <style>
@@ -71,10 +151,10 @@
 </style>
 <div class="max-w-3xl mx-auto px-4 pt-5">
   <div class="tabs-row">
-    <button onclick="switchTab('wstepy')"      id="t-wstepy"      class="tab-btn active-wstepy">Wstępy</button>
-    <button onclick="switchTab('argumenty')"   id="t-argumenty"   class="tab-btn">Kontra-argumenty</button>
-    <button onclick="switchTab('mocnestrony')" id="t-mocnestrony" class="tab-btn">Mocne strony</button>
+    <button onclick="switchTab('mocnestrony')" id="t-mocnestrony" class="tab-btn active-mocnestrony">Mocne strony</button>
+    <button onclick="switchTab('wstepy')"      id="t-wstepy"      class="tab-btn">Wstępy</button>
     <button onclick="switchTab('pytania')"     id="t-pytania"     class="tab-btn">Pytania</button>
+    <button onclick="switchTab('argumenty')"   id="t-argumenty"   class="tab-btn">Kontra-argumenty</button>
     <button onclick="switchTab('wzory')"       id="t-wzory"       class="tab-btn">Wzory</button>
     <button onclick="switchTab('konkurencja')" id="t-konkurencja" class="tab-btn">Konkurencja</button>
     <button onclick="switchTab('ulubione')"    id="t-ulubione"    class="tab-btn" style="display:inline-flex;align-items:center;gap:5px">
@@ -87,7 +167,7 @@
 <main class="max-w-3xl mx-auto px-4 py-6">
 
   <!-- WSTĘPY -->
-  <div id="tab-wstepy">
+  <div id="tab-wstepy" class="hidden">
     <div class="flex items-center justify-between mb-4">
       <p class="text-sm text-gray-400"><span id="ci">1</span> / <span id="ct">10</span></p>
       <button onclick="openModal()" class="flex items-center gap-2 text-white text-sm font-semibold px-4 py-2 rounded-full shadow" style="background:#00d084">
@@ -182,7 +262,7 @@
   </div>
 
   <!-- MOCNE STRONY -->
-  <div id="tab-mocnestrony" class="hidden">
+  <div id="tab-mocnestrony">
 
     <!-- HERO -->
     <div style="background:linear-gradient(135deg,#7a00df 0%,#0693e3 60%,#00d084 100%);border-radius:24px;padding:36px 28px 32px;margin-bottom:24px;text-align:center;position:relative;overflow:hidden">
@@ -209,6 +289,18 @@
       <div class="stat-card">
         <div style="font-size:2rem;font-weight:900;color:#0693e3;line-height:1">500 000+</div>
         <div style="font-size:0.75rem;font-weight:600;color:#6b7280;margin-top:6px;line-height:1.4">rodziców korzysta codziennie</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:2rem;font-weight:900;color:#ff6b35;line-height:1">8 godz.</div>
+        <div style="font-size:0.75rem;font-weight:600;color:#6b7280;margin-top:6px;line-height:1.4">oszczędności czasu miesięcznie per nauczyciel</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:2rem;font-weight:900;color:#e11d48;line-height:1">6 godz.</div>
+        <div style="font-size:0.75rem;font-weight:600;color:#6b7280;margin-top:6px;line-height:1.4">oszczędności na rozliczeniach miesięcznie</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:2rem;font-weight:900;color:#00d084;line-height:1">100%</div>
+        <div style="font-size:0.75rem;font-weight:600;color:#6b7280;margin-top:6px;line-height:1.4">wiadomości docierających do rodziców</div>
       </div>
     </div>
 
@@ -247,7 +339,134 @@
   </div>
 </div>
 
+</div><!-- /app-shell -->
+
 <script>
+// ── PROFILE I LOGOWANIE ──────────────────────────────────────────────────────
+var PROFILES = [
+  { name:'Marek',    pin:'0000', color:'#0891b2' },
+  { name:'Justyna',  pin:'0000', color:'#7a00df' },
+  { name:'KamilP',   pin:'0000', color:'#00d084' },
+  { name:'Karolina', pin:'0000', color:'#e11d48' },
+  { name:'Oliwia',   pin:'0000', color:'#f59e0b' },
+  { name:'Kamil',    pin:'0000', color:'#0693e3' },
+];
+
+var currentProfile = null;
+var selectedProfile = null;
+
+var AVATAR_COLORS = ['#0891b2','#7a00df','#00d084','#e11d48','#ff6b35','#f59e0b'];
+
+function initials(name) {
+  return name.substring(0,2).toUpperCase();
+}
+
+function renderProfileList() {
+  var list = document.getElementById('profile-list');
+  list.innerHTML = '';
+  PROFILES.forEach(function(p, i) {
+    var chip = document.createElement('button');
+    chip.className = 'profile-chip';
+    chip.setAttribute('data-pi', i);
+    chip.innerHTML =
+      '<div class="profile-avatar" style="background:' + (p.color || AVATAR_COLORS[i % AVATAR_COLORS.length]) + '">' + initials(p.name) + '</div>' +
+      '<span style="font-size:0.9rem;font-weight:600;color:#111827">' + p.name + '</span>';
+    chip.onclick = function() {
+      document.querySelectorAll('.profile-chip').forEach(function(c){ c.classList.remove('selected'); });
+      chip.classList.add('selected');
+      selectedProfile = PROFILES[parseInt(chip.getAttribute('data-pi'))];
+      var sec = document.getElementById('pin-section');
+      sec.style.display = 'block';
+      document.getElementById('pin-label').textContent = 'PIN dla ' + selectedProfile.name;
+      document.getElementById('pin-input').value = '';
+      document.getElementById('login-error').textContent = '';
+      setTimeout(function(){ document.getElementById('pin-input').focus(); }, 50);
+    };
+    list.appendChild(chip);
+  });
+}
+
+function doLogin() {
+  if (!selectedProfile) {
+    document.getElementById('login-error').textContent = 'Wybierz profil.';
+    return;
+  }
+  var pin = document.getElementById('pin-input').value.trim();
+  if (pin !== selectedProfile.pin) {
+    document.getElementById('login-error').textContent = 'Błędny PIN — spróbuj ponownie.';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+    return;
+  }
+  currentProfile = selectedProfile;
+  localStorage.setItem('lk_session', JSON.stringify({name: currentProfile.name, color: currentProfile.color}));
+  loadProfileData();
+  showApp();
+}
+
+function doLogout() {
+  saveProfileData();
+  localStorage.removeItem('lk_session');
+  currentProfile = null;
+  selectedProfile = null;
+  document.getElementById('pin-section').style.display = 'none';
+  document.getElementById('login-error').textContent = '';
+  document.querySelectorAll('.profile-chip').forEach(function(c){ c.classList.remove('selected'); });
+  document.getElementById('app-shell').style.display = 'none';
+  document.getElementById('main-header').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-header').style.display = 'block';
+  document.getElementById('app-shell').style.display = 'block';
+  var badge = document.getElementById('user-name-badge');
+  if (badge) badge.textContent = currentProfile.name;
+  switchTab('mocnestrony');
+  renderCard();
+}
+
+function loadProfileData() {
+  if (!currentProfile) return;
+  var key = 'lk_data_' + currentProfile.name;
+  var data = JSON.parse(localStorage.getItem(key) || '{}');
+  favs = data.favs || [];
+  mocneFavs = data.mocneFavs || [];
+  if (data.customScripts) {
+    data.customScripts.forEach(function(s){ if (!scripts.find(function(x){ return x.id === s.id; })) scripts.push(s); });
+  }
+  updateFavCount();
+}
+
+function saveProfileData() {
+  if (!currentProfile) return;
+  var key = 'lk_data_' + currentProfile.name;
+  localStorage.setItem(key, JSON.stringify({
+    favs: favs,
+    mocneFavs: mocneFavs,
+    customScripts: scripts.filter(function(s){ return s.custom; })
+  }));
+}
+
+function checkSession() {
+  renderProfileList();
+  var saved = localStorage.getItem('lk_session');
+  if (saved) {
+    var sess = JSON.parse(saved);
+    var profile = null;
+    PROFILES.forEach(function(p){ if (p.name === sess.name) profile = p; });
+    if (profile) {
+      currentProfile = profile;
+      selectedProfile = profile;
+      loadProfileData();
+      showApp();
+      return;
+    }
+  }
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
 // ── DANE ─────────────────────────────────────────────────────────────────────
 var scripts = [
   { id:1,  title:"Szczerość",
@@ -402,9 +621,13 @@ function removeFav(id) {
 var mocneFavs = [];
 
 function toggleMocneFav(i) {
-  var pos = mocneFavs.indexOf(i);
+  var ai = mocneIdx[i];
+  var pos = -1;
+  for (var k = 0; k < mocneFavs.length; k++) {
+    if (mocneFavs[k].c === i && mocneFavs[k].a === ai) { pos = k; break; }
+  }
   if (pos !== -1) mocneFavs.splice(pos, 1);
-  else mocneFavs.push(i);
+  else mocneFavs.push({c: i, a: ai});
   updateFavCount();
   renderMocneStrony();
 }
@@ -414,10 +637,12 @@ function renderMocneFavList() {
   var empty = document.getElementById('mocne-fav-empty');
   if (!list) return;
   list.innerHTML = '';
-  var items = MOCNE_CARDS.filter(function(_, i) { return mocneFavs.indexOf(i) !== -1; });
-  if (!items.length) { empty.classList.remove('hidden'); return; }
+  if (!mocneFavs.length) { empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
-  items.forEach(function(card) {
+  mocneFavs.forEach(function(f) {
+    var card = MOCNE_CARDS[f.c];
+    if (!card) return;
+    var argText = (card.args[f.a] === '__CALC__') ? 'Kalkulator czasu oszcz\u0119dno\u015bci' : (card.args[f.a] || card.args[0]);
     var el = document.createElement('div');
     el.className = 'benefit-card';
     el.innerHTML =
@@ -425,7 +650,7 @@ function renderMocneFavList() {
       '<div class="benefit-body">' +
         '<span class="benefit-badge" style="' + card.badgeStyle + '">' + card.badge + '</span>' +
         '<div class="benefit-title">' + card.title + '</div>' +
-        '<p class="benefit-text">' + card.args[0] + '</p>' +
+        '<p class="benefit-text">' + argText + '</p>' +
       '</div>';
     list.appendChild(el);
   });
@@ -465,7 +690,7 @@ function saveScript() {
 }
 
 // ── ZAKŁADKI ─────────────────────────────────────────────────────────────────
-var TABS = ['wstepy','argumenty','pytania','wzory','mocnestrony','konkurencja','ulubione'];
+var TABS = ['mocnestrony','wstepy','pytania','argumenty','wzory','konkurencja','ulubione'];
 
 function switchTab(name) {
   TABS.forEach(function(t) {
@@ -849,7 +1074,7 @@ function renderKonkurencja() {
 var MOCNE_CARDS = [
   { title:"Dziennik elektroniczny",
     badge:"📓 Koniec z papierem", badgeStyle:"background:#fce7f3;color:#9d174d",
-    img:"https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=600&q=80",
+    img:"https://images.unsplash.com/photo-1486403184395-fc4990866136?w=600&q=80",
     args:[
       "Prosty zapis, łatwa obsługa. LiveKid pilnuje kompletności wpisów, a nauczycielki poświęcają czas dzieciom — nie biurokracji.",
       "Prosty zapis, łatwa obsługa. Wpis zajmuje chwilę, a system pilnuje kompletności. Mniej papieru, mniej stresu, więcej czasu na to, co ważne.",
@@ -857,7 +1082,7 @@ var MOCNE_CARDS = [
     ] },
   { title:"Komunikacja z rodzicami",
     badge:"💬 Szybciej, nie zimniej", badgeStyle:"background:#e0f2fe;color:#0369a1",
-    img:"https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80",
+    img:"https://images.unsplash.com/photo-1758520144427-ddb02ac74e9d?w=600&q=80",
     args:[
       "LiveKid nie zastępuje kontaktu osobistego — upraszcza i przyspiesza komunikację. Jedno kliknięcie zamiast dziesięciu telefonów. Dyrektor zostaje ciepłym centrum placówki.",
       "Nie chcemy zabrać komunikacji z rodzicami — chcemy ją wzbogacić o to, co najważniejsze. Dyrektor zostaje ciepłym centrum placówki.",
@@ -866,7 +1091,7 @@ var MOCNE_CARDS = [
     ] },
   { title:"Automatyzacja cateringu",
     badge:"⏱️ Godziny odzyskane każdego tygodnia", badgeStyle:"background:#fee2e2;color:#b91c1c",
-    img:"https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80",
+    img:"https://images.unsplash.com/photo-1662116663511-9d79d49da183?w=600&q=80",
     args:[
       "LiveKid automatycznie zlicza obecności i wysyła wiadomości do cateringu — o ustalonej godzinie, bez udziału personelu. Koniec z ręcznym liczeniem i wysyłaniem SMS-ów każdego ranka.",
       "Koniec z ręcznym liczeniem i wysyłaniem wiadomości do cateringu. System robi to automatycznie — o ustalonej godzinie, bez udziału personelu.",
@@ -890,7 +1115,7 @@ var MOCNE_CARDS = [
     ] },
   { title:"Prywatny opiekun placówki",
     badge:"📞 Jedna osoba. Jeden telefon.", badgeStyle:"background:#ede9fe;color:#7c3aed",
-    img:"https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&q=80",
+    img:"https://images.unsplash.com/photo-1758876201450-cf77ab8b95bc?w=600&q=80",
     args:[
       "LiveKid przydziela każdej placówce prywatnego opiekuna — jedną osobę, jeden numer. Zna specyfikę placówki, pomaga w trudnościach i przeprowadza przez wdrożenie aplikacji krok po kroku.",
       "Jedna osoba. Jeden numer telefonu. Zna Twoją placówkę, pomaga przy trudnościach i przeprowadza przez wdrożenie aplikacji krok po kroku. Nie zostawiamy Cię samej."
@@ -980,7 +1205,7 @@ function renderMocneStrony() {
       bodyContent = '<p class="benefit-text" style="min-height:72px">' + text + '</p>';
     }
 
-    var isFav = mocneFavs.indexOf(i) !== -1;
+    var isFav = mocneFavs.some(function(f) { return f.c === i && f.a === ai; });
     var el = document.createElement('div');
     el.className = 'benefit-card';
     el.innerHTML =
@@ -1006,8 +1231,143 @@ function renderMocneStrony() {
   });
 }
 
+// ── WYSZUKIWARKA ─────────────────────────────────────────────────────────────
+var CAT_STYLE = {
+  'Zakładka':         'background:#e0f2fe;color:#0369a1',
+  'Wstęp':            'background:#dcfce7;color:#166534',
+  'Kontra-argument':  'background:#ede9fe;color:#6d28d9',
+  'Pytanie':          'background:#dbeafe;color:#1d4ed8',
+  'Wzór SMS':         'background:#ffedd5;color:#c2410c',
+  'Mocna strona':     'background:#cffafe;color:#0e7490',
+  'Konkurent':        'background:#fee2e2;color:#be123c',
+};
+
+function buildSearchIndex() {
+  var items = [];
+  var tabs = [
+    {label:'Mocne strony',     tab:'mocnestrony'},
+    {label:'Wstępy',           tab:'wstepy'},
+    {label:'Pytania',          tab:'pytania'},
+    {label:'Kontra-argumenty', tab:'argumenty'},
+    {label:'Wzory',            tab:'wzory'},
+    {label:'Konkurencja',      tab:'konkurencja'},
+    {label:'Ulubione',         tab:'ulubione'},
+  ];
+  tabs.forEach(function(t) {
+    items.push({cat:'Zakładka', label:t.label, tab:t.tab, action:null});
+  });
+  MOCNE_CARDS.forEach(function(c, i) {
+    items.push({cat:'Mocna strona', label:c.title, tab:'mocnestrony', action:null});
+  });
+  scripts.forEach(function(s, si) {
+    (function(cardIdx) {
+      items.push({cat:'Wstęp', label:s.title, tab:'wstepy', action:function(){
+        switchTab('wstepy');
+        idx = cardIdx;
+        renderCard();
+        window.scrollTo({top:0, behavior:'smooth'});
+      }});
+    })(si);
+  });
+  OBJECTIONS.forEach(function(o, oi) {
+    (function(ai) {
+      items.push({cat:'Kontra-argument', label:o.title, tab:'argumenty', action:function(){
+        switchTab('argumenty');
+        if (openArg.indexOf(ai) === -1) openArg.push(ai);
+        renderArgumenty();
+        setTimeout(function(){ var el = document.querySelector('[data-arg="'+ai+'"]'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }, 80);
+      }});
+    })(oi);
+  });
+  QUESTIONS.forEach(function(sec) {
+    sec.questions.forEach(function(q) {
+      items.push({cat:'Pytanie', label:q.q.substring(0,60)+(q.q.length>60?'…':''), tab:'pytania', action:null});
+    });
+  });
+  TEMPLATES.forEach(function(t) {
+    items.push({cat:'Wzór SMS', label:t.title, tab:'wzory', action:null});
+  });
+  COMPETITORS.forEach(function(c, ci) {
+    (function(ki) {
+      items.push({cat:'Konkurent', label:c.name, tab:'konkurencja', action:function(){
+        switchTab('konkurencja');
+        if (openKonk.indexOf(ki) === -1) openKonk.push(ki);
+        renderKonkurencja();
+        setTimeout(function(){ var el = document.querySelector('[data-konk="'+ki+'"]'); if(el) el.scrollIntoView({behavior:'smooth',block:'center'}); }, 80);
+      }});
+    })(ci);
+  });
+  return items;
+}
+
+var searchIdx = null;
+var searchActive = -1;
+
+function onSearch(val) {
+  var dd = document.getElementById('search-dropdown');
+  var clr = document.getElementById('search-clear');
+  clr.style.display = val ? 'block' : 'none';
+  if (!val.trim()) { dd.style.display = 'none'; return; }
+  if (!searchIdx) searchIdx = buildSearchIndex();
+  var q = val.toLowerCase();
+  var results = searchIdx.filter(function(item) {
+    return item.label.toLowerCase().indexOf(q) !== -1 || item.cat.toLowerCase().indexOf(q) !== -1;
+  }).slice(0, 10);
+  searchActive = -1;
+  if (!results.length) {
+    dd.style.display = 'block';
+    dd.innerHTML = '<div class="search-empty">Brak wyników dla „' + val + '"</div>';
+    return;
+  }
+  dd.style.display = 'block';
+  dd.innerHTML = '';
+  results.forEach(function(item, ri) {
+    var row = document.createElement('div');
+    row.className = 'search-result';
+    row.setAttribute('data-ri', ri);
+    row.innerHTML =
+      '<span class="search-result-cat" style="' + (CAT_STYLE[item.cat]||'background:#f3f4f6;color:#374151') + '">' + item.cat + '</span>' +
+      '<span class="search-result-label">' + item.label + '</span>';
+    row.onclick = function() { execSearchResult(item); };
+    dd.appendChild(row);
+  });
+  dd._results = results;
+}
+
+function execSearchResult(item) {
+  clearSearch();
+  if (item.action) { item.action(); }
+  else { switchTab(item.tab); if (item.tab === 'mocnestrony') renderMocneStrony(); }
+}
+
+function onSearchKey(e) {
+  var dd = document.getElementById('search-dropdown');
+  if (dd.style.display === 'none') return;
+  var rows = dd.querySelectorAll('.search-result');
+  if (e.key === 'ArrowDown') { searchActive = Math.min(searchActive+1, rows.length-1); highlightRow(rows); e.preventDefault(); }
+  else if (e.key === 'ArrowUp') { searchActive = Math.max(searchActive-1, 0); highlightRow(rows); e.preventDefault(); }
+  else if (e.key === 'Enter' && searchActive >= 0 && dd._results) { execSearchResult(dd._results[searchActive]); }
+  else if (e.key === 'Escape') { clearSearch(); }
+}
+
+function highlightRow(rows) {
+  rows.forEach(function(r,i){ r.style.background = i===searchActive ? '#f0f9ff' : ''; });
+  if (rows[searchActive]) rows[searchActive].scrollIntoView({block:'nearest'});
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-dropdown').style.display = 'none';
+  document.getElementById('search-clear').style.display = 'none';
+  searchActive = -1;
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.search-wrap')) clearSearch();
+});
+
 // ── INIT ─────────────────────────────────────────────────────────────────────
-renderCard();
+checkSession();
 </script>
 </body>
 </html>
